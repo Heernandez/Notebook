@@ -1,0 +1,52 @@
+{% extends "Book/base.html" %}
+{% load socialaccount %}
+
+{% block title %}Log in{% endblock %}
+
+{% block content %}
+  <section class="form-shell">
+    <div class="form-card">
+      <h1>Welcome back</h1>
+      <p>Log in to manage your books.</p>
+      <form method="post" class="form-grid">
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+        <div class="form-group">
+          <label for="{{ form.username.id_for_label }}">Username</label>
+          {{ form.username }}
+        </div>
+        <div class="form-group">
+          <label for="{{ form.password.id_for_label }}">Password</label>
+          {{ form.password }}
+        </div>
+        <input type="hidden" name="next" value="{{ next }}" />
+        <div class="form-actions">
+          <button class="btn btn-primary" type="submit">Log in</button>
+          <a class="btn btn-ghost" href="{% url 'User:signup' %}">Create account</a>
+        </div>
+      </form>
+      {% get_providers as socialaccount_providers %}
+      {% if socialaccount_providers %}
+        <div class="divider">
+          <span>or continue with</span>
+        </div>
+        <div class="social-actions">
+          {% for provider in socialaccount_providers %}
+            {% if provider.id == "google" %}
+              <a class="btn btn-ghost" href="{% provider_login_url provider.id %}">Google</a>
+            {% endif %}
+            {% if provider.id == "apple" %}
+              <a class="btn btn-ghost" href="{% provider_login_url provider.id %}">Apple</a>
+            {% endif %}
+            {% if provider.id == "microsoft" %}
+              <a class="btn btn-ghost" href="{% provider_login_url provider.id %}">Outlook</a>
+            {% endif %}
+          {% endfor %}
+        </div>
+      {% endif %}
+      <div class="meta">
+        <a href="{% url 'User:password_reset' %}">Forgot password?</a>
+      </div>
+    </div>
+  </section>
+{% endblock %}

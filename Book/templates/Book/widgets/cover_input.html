@@ -1,0 +1,8 @@
+<input
+  type="file"
+  name="{{ widget.name }}"
+  {% if widget.value %}data-has-file="true"{% endif %}
+  {% if widget.attrs.id %}id="{{ widget.attrs.id }}"{% endif %}
+  {% if widget.attrs.class %}class="{{ widget.attrs.class }}"{% endif %}
+  {% if widget.attrs.accept %}accept="{{ widget.attrs.accept }}"{% endif %}
+/>

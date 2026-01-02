@@ -1,0 +1,33 @@
+{% extends "Book/base.html" %}
+
+{% block title %}Complete your profile{% endblock %}
+
+{% block content %}
+  <section class="form-shell">
+    <div class="form-card">
+      <h1>Almost done</h1>
+      <p>Complete your profile to finish signing up.</p>
+      <form method="post" class="form-grid">
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+        {% for field in form %}
+          <div class="form-group">
+            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {{ field }}
+            {% if field.errors %}
+              <div class="alert">
+                {% for error in field.errors %}
+                  <p>{{ error }}</p>
+                {% endfor %}
+              </div>
+            {% endif %}
+          </div>
+        {% endfor %}
+        <div class="form-actions">
+          <button class="btn btn-primary" type="submit">Finish</button>
+          <a class="btn btn-ghost" href="/">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </section>
+{% endblock %}

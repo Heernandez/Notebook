@@ -1,0 +1,128 @@
+{% extends "Book/base.html" %}
+
+{% block title %}{{ book.title }}{% endblock %}
+
+{% block content %}
+  {% if book_missing %}
+    <section class="empty-state">
+      <h1>Book not found</h1>
+      <p>No book exists with ID {{ requested_id }}.</p>
+      <a class="btn btn-primary" href="{% url 'Book:public_list' %}">Go to home</a>
+    </section>
+  {% else %}
+    <section class="detail-hero">
+      <div class="detail-cover">
+        {% if book.cover_image %}
+          <img src="{{ book.cover_image.url }}" alt="Cover for {{ book.title }}" />
+        {% else %}
+          <div class="cover-placeholder cover-placeholder--large">No cover</div>
+        {% endif %}
+      </div>
+      <div class="detail-info">
+        <div class="detail-title">
+          <h1>{{ book.title }}</h1>
+          <span class="chip {% if book.is_public %}chip-public{% else %}chip-private{% endif %}">
+            {% if book.is_public %}Public{% else %}Private{% endif %}
+          </span>
+        </div>
+        <p class="meta">By {{ book.owner.first_name }} {{ book.owner.last_name }} · Updated {{ book.updated_at|date:"M d, Y" }}</p>
+        <p>{{ book.description|default:"No description yet" }}</p>
+        {% if user == book.owner %}
+          <div class="detail-actions">
+            <a class="btn btn-primary" href="{% url 'Book:edit' book.pk %}">Edit book</a>
+            <a class="btn btn-ghost" href="{% url 'Book:add_leaf' book.pk %}">Add leaf</a>
+          </div>
+        {% endif %}
+        <div class="detail-actions">
+          <a class="btn btn-ghost" href="{% url 'Book:reader' book.pk %}">Open reader</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="content-block book-scroll">
+      <div class="book-header">
+        <div>
+          <h2>Leaves</h2>
+          <span class="meta">{{ leaves|length }} page{% if leaves|length != 1 %}s{% endif %}</span>
+        </div>
+        <form method="get" class="order-form">
+          <label for="leaf-order" class="meta">Order</label>
+          <select id="leaf-order" name="order" onchange="this.form.submit()">
+            <option value="newest" {% if leaf_order != "oldest" %}selected{% endif %}>Newest</option>
+            <option value="oldest" {% if leaf_order == "oldest" %}selected{% endif %}>Oldest</option>
+          </select>
+        </form>
+      </div>
+      {% if leaves %}
+        <div class="leaf-scroll">
+          {% for leaf in leaves %}
+            <article class="leaf-page">
+              <div class="leaf-meta">
+                {% if leaf_order == "oldest" %}
+                  <span class="chip chip-public">Leaf {{ forloop.counter }}</span>
+                {% else %}
+                  <span class="chip chip-public">Leaf {{ forloop.revcounter }}</span>
+                {% endif %}
+                <span class="meta">Added {{ leaf.created_at|date:"M d, Y" }}</span>
+              </div>
+              {% if leaf.images.exists %}
+                {% if leaf.images.count > 1 %}
+                  <div class="leaf-slider" data-leaf-slider>
+                    <div class="leaf-slider-track">
+                      {% for image in leaf.images.all %}
+                        <img src="{{ image.image.url }}" alt="Leaf image" />
+                      {% endfor %}
+                    </div>
+                    <button class="slider-btn slider-prev" type="button">Prev</button>
+                    <button class="slider-btn slider-next" type="button">Next</button>
+                  </div>
+                {% else %}
+                  <div class="leaf-gallery">
+                    {% for image in leaf.images.all %}
+                      <img src="{{ image.image.url }}" alt="Leaf image" />
+                    {% endfor %}
+                  </div>
+                {% endif %}
+              {% endif %}
+              {% if leaf.text %}
+                <div class="leaf-text">
+                  {{ leaf.text|linebreaks }}
+                </div>
+              {% endif %}
+              {% if user == book.owner %}
+                <div class="card-actions">
+                  <a class="btn btn-ghost" href="{% url 'Book:edit_leaf' leaf.pk %}">Edit leaf</a>
+                </div>
+              {% endif %}
+            </article>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p class="meta">No leaves yet.</p>
+      {% endif %}
+    </section>
+  {% endif %}
+
+  <script>
+    (function () {
+      document.querySelectorAll("[data-leaf-slider]").forEach(function (slider) {
+        var track = slider.querySelector(".leaf-slider-track");
+        var slides = track ? track.querySelectorAll("img") : [];
+        if (!track || slides.length < 2) return;
+        var index = 0;
+        function update() {
+          track.style.transform = "translateX(" + (-index * 100) + "%)";
+        }
+        slider.querySelector(".slider-prev").addEventListener("click", function () {
+          index = (index - 1 + slides.length) % slides.length;
+          update();
+        });
+        slider.querySelector(".slider-next").addEventListener("click", function () {
+          index = (index + 1) % slides.length;
+          update();
+        });
+        update();
+      });
+    })();
+  </script>
+{% endblock %}

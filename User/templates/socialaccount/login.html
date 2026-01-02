@@ -1,0 +1,19 @@
+{% extends "Book/base.html" %}
+
+{% block title %}Continue{% endblock %}
+
+{% block content %}
+  <section class="form-shell">
+    <div class="form-card">
+      <h1>Continue with your provider</h1>
+      <p>We are completing your sign-in.</p>
+      <form method="post" action="">
+        {% csrf_token %}
+        <div class="form-actions">
+          <button class="btn btn-primary" type="submit">Continue</button>
+          <a class="btn btn-ghost" href="/">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </section>
+{% endblock %}

@@ -1,0 +1,44 @@
+Guia paso a paso para mantener requirements.txt
+=============================================
+
+Opcion A: Simple con pip freeze
+1) Activa tu entorno virtual
+   source .venv/bin/activate
+2) Instala la libreria que necesites
+   pip install NOMBRE_LIB
+3) Reconstituye el archivo completo
+   pip freeze > requirements.txt
+4) Verifica que el proyecto corre
+   python manage.py runserver
+
+Notas:
+- Este metodo agrega dependencias directas y transitivas.
+- Es rapido, pero el archivo puede crecer mas de lo necesario.
+
+
+Opcion B: Recomendado con pip-tools
+1) Instala pip-tools dentro del venv
+   pip install pip-tools
+2) Crea un archivo requirements.in con SOLO deps directas
+   Ejemplo:
+   Django>=5.0,<6.0
+   Pillow>=10.0
+   python-dotenv>=1.0
+3) Genera requirements.txt con versiones fijas
+   pip-compile requirements.in
+4) Instala exactamente lo compilado
+   pip-sync requirements.txt
+5) Cuando agregues nuevas deps:
+   - agrega la nueva linea en requirements.in
+   - vuelve a ejecutar: pip-compile requirements.in
+   - vuelve a ejecutar: pip-sync requirements.txt
+
+Notas:
+- requirements.in es la fuente de verdad.
+- requirements.txt queda limpio, reproducible y estable.
+
+
+Consejos rapidos
+- Actualiza requirements.txt cuando termines una nueva funcionalidad.
+- Si trabajas en equipo, evita editar requirements.txt a mano.
+- Revisa que el proyecto siga corriendo luego de cada cambio.

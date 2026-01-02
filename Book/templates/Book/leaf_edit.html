@@ -1,0 +1,132 @@
+{% extends "Book/base.html" %}
+
+{% block title %}Edit leaf{% endblock %}
+
+{% block content %}
+  {% if leaf_missing %}
+    <section class="empty-state">
+      <h1>Leaf not found</h1>
+      <p>No leaf exists with ID {{ requested_id }}.</p>
+      <a class="btn btn-primary" href="{% url 'Book:public_list' %}">Go to home</a>
+    </section>
+  {% else %}
+    <section class="form-shell">
+      <div class="form-card">
+        <h1>Edit leaf</h1>
+        <p>Update the text or photo for this leaf.</p>
+        <form method="post" enctype="multipart/form-data" class="form-grid" data-counter-form>
+          {% csrf_token %}
+          {{ form.non_field_errors }}
+          <div class="form-group">
+            <label for="{{ form.text.id_for_label }}">Text</label>
+            {{ form.text }}
+            <div class="meta counter" data-counter-for="{{ form.text.id_for_label }}"></div>
+          </div>
+          <div class="form-group">
+            <label for="id_images">Photos</label>
+            <input id="id_images" name="images" type="file" multiple />
+            <span class="meta">You can select multiple photos.</span>
+            <div class="image-preview" data-preview-list></div>
+          </div>
+          <div class="form-actions">
+            <button class="btn btn-primary" type="submit">Save</button>
+            <a class="btn btn-ghost" href="{% url 'Book:detail' form.instance.book.pk %}">Cancel</a>
+          </div>
+        </form>
+        {% if form.instance.images.exists %}
+          <div class="image-grid">
+            {% for image in form.instance.images.all %}
+              <div class="image-card">
+                <img src="{{ image.image.url }}" alt="Leaf image" />
+                <form method="post" action="{% url 'Book:delete_leaf_image' image.pk %}">
+                  {% csrf_token %}
+                  <button class="btn btn-ghost" type="submit">Delete</button>
+                </form>
+              </div>
+            {% endfor %}
+          </div>
+        {% endif %}
+      </div>
+    </section>
+
+    <script>
+      (function () {
+        function updateCounter(input, counter) {
+          if (!input || !counter) return;
+          var max = input.getAttribute("maxlength");
+          if (!max) return;
+          var length = (input.value || "").length;
+          counter.textContent = length + " / " + max;
+        }
+
+        document.querySelectorAll("[data-counter-form]").forEach(function (form) {
+          form.querySelectorAll(".counter").forEach(function (counter) {
+            var id = counter.getAttribute("data-counter-for");
+            var input = form.querySelector("#" + id);
+            if (!input) return;
+            updateCounter(input, counter);
+            input.addEventListener("input", function () {
+              updateCounter(input, counter);
+            });
+          });
+        });
+      })();
+    </script>
+    <script>
+      (function () {
+        var input = document.getElementById("id_images");
+        var list = document.querySelector("[data-preview-list]");
+        if (!input || !list) return;
+
+        var dt = new DataTransfer();
+
+        function render() {
+          list.innerHTML = "";
+          Array.from(dt.files).forEach(function (file, index) {
+            var url = URL.createObjectURL(file);
+            var item = document.createElement("div");
+            item.className = "image-preview-item";
+
+            var img = document.createElement("img");
+            img.src = url;
+            img.alt = "Selected photo";
+
+            var btn = document.createElement("button");
+            btn.type = "button";
+            btn.className = "btn btn-ghost";
+            btn.textContent = "Remove";
+            btn.addEventListener("click", function () {
+              dt.items.remove(index);
+              input.files = dt.files;
+              render();
+            });
+
+            item.appendChild(img);
+            item.appendChild(btn);
+            list.appendChild(item);
+          });
+        }
+
+        function hasFile(file) {
+          return Array.from(dt.files).some(function (existing) {
+            return (
+              existing.name === file.name &&
+              existing.size === file.size &&
+              existing.lastModified === file.lastModified
+            );
+          });
+        }
+
+        input.addEventListener("change", function () {
+          Array.from(input.files).forEach(function (file) {
+            if (!hasFile(file)) {
+              dt.items.add(file);
+            }
+          });
+          input.files = dt.files;
+          render();
+        });
+      })();
+    </script>
+  {% endif %}
+{% endblock %}

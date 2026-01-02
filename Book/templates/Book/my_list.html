@@ -1,0 +1,51 @@
+{% extends "Book/base.html" %}
+
+{% block title %}My books{% endblock %}
+
+{% block content %}
+  <section class="hero">
+    <div>
+      <h1>My books</h1>
+      <p>Manage your notes and choose if they are private or public.</p>
+    </div>
+    <a class="btn btn-primary" href="{% url 'Book:create' %}">New book</a>
+  </section>
+
+  {% if books %}
+    <section class="grid">
+      {% for book in books %}
+        <article class="card">
+          <a href="{% url 'Book:detail' book.pk %}">
+            <div class="card-cover">
+              {% if book.cover_image %}
+                <img src="{{ book.cover_image.url }}" alt="Cover for {{ book.title }}" />
+              {% else %}
+                <div class="cover-placeholder">No cover</div>
+              {% endif %}
+            </div>
+          </a>
+          <div class="card-body">
+            <div class="card-top">
+              <a href="{% url 'Book:detail' book.pk %}">
+                <h3>{{ book.title }}</h3>
+              </a>
+              <span class="chip {% if book.is_public %}chip-public{% else %}chip-private{% endif %}">
+                {% if book.is_public %}Public{% else %}Private{% endif %}
+              </span>
+            </div>
+            <p>{{ book.description|default:"No description yet"|truncatechars:120 }}</p>
+            <div class="card-actions">
+              <a class="btn btn-ghost" href="{% url 'Book:edit' book.pk %}">Edit</a>
+            </div>
+          </div>
+        </article>
+      {% endfor %}
+    </section>
+  {% else %}
+    <div class="empty-state">
+      <h3>You do not have any books yet</h3>
+      <p>Create one to start saving your notes.</p>
+      <a class="btn btn-primary" href="{% url 'Book:create' %}">Create book</a>
+    </div>
+  {% endif %}
+{% endblock %}

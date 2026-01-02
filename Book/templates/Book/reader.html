@@ -1,0 +1,156 @@
+{% extends "Book/base.html" %}
+
+{% block body_class %}reader-body{% endblock %}
+
+{% block title %}{{ book.title }} · Reader{% endblock %}
+
+{% block content %}
+  {% if book_missing %}
+    <section class="empty-state">
+      <h1>Book not found</h1>
+      <p>No book exists with ID {{ requested_id }}.</p>
+      <a class="btn btn-primary" href="{% url 'Book:public_list' %}">Go to home</a>
+    </section>
+  {% else %}
+    <section class="reader-shell reader-full">
+      <header class="reader-header">
+        <div>
+          <h1>{{ book.title }}</h1>
+          <span class="meta">By {{ book.owner.first_name }} {{ book.owner.last_name }}</span>
+        </div>
+        <div class="reader-actions">
+          <span class="meta" data-reader-counter>1 / {{ leaves|length }}</span>
+          <a class="btn btn-ghost" href="{% url 'Book:detail' book.pk %}">Exit reader</a>
+        </div>
+      </header>
+
+      {% if leaves %}
+        <div class="reader-stage" data-reader>
+          <button class="reader-nav reader-prev" type="button">Prev</button>
+          <div class="reader-track">
+            {% for leaf in leaves %}
+              <article class="reader-page">
+                <div class="leaf-meta">
+                  <span class="chip chip-public">Leaf {{ forloop.counter }}</span>
+                  <span class="meta">{{ leaf.created_at|date:"M d, Y" }}</span>
+                </div>
+                {% if leaf.images.exists %}
+                  <div class="reader-gallery">
+                    {% for image in leaf.images.all %}
+                      <img src="{{ image.image.url }}" alt="Leaf image" />
+                    {% endfor %}
+                  </div>
+                {% endif %}
+                {% if leaf.text %}
+                  <div class="leaf-text">
+                    {{ leaf.text|linebreaks }}
+                  </div>
+                {% endif %}
+              </article>
+            {% endfor %}
+          </div>
+          <button class="reader-nav reader-next" type="button">Next</button>
+        </div>
+      {% else %}
+        <div class="empty-state">
+          <h3>No leaves yet</h3>
+          <p>Create a leaf to start your reader view.</p>
+        </div>
+      {% endif %}
+    </section>
+  {% endif %}
+
+  <script>
+    (function () {
+      var stage = document.querySelector("[data-reader]");
+      if (!stage) return;
+      var track = stage.querySelector(".reader-track");
+      var pages = track.querySelectorAll(".reader-page");
+      var prev = stage.querySelector(".reader-prev");
+      var next = stage.querySelector(".reader-next");
+      var counter = document.querySelector("[data-reader-counter]");
+      var index = 0;
+      var startX = 0;
+      var currentX = 0;
+      var dragging = false;
+
+      function update() {
+        track.style.transform = "translateX(" + (-index * 100) + "%)";
+        if (counter) {
+          counter.textContent = (index + 1) + " / " + pages.length;
+        }
+      }
+
+      function clampIndex() {
+        if (index < 0) index = 0;
+        if (index >= pages.length) index = pages.length - 1;
+      }
+
+      function go(delta) {
+        index += delta;
+        clampIndex();
+        update();
+      }
+
+      function onStart(clientX) {
+        dragging = true;
+        startX = clientX;
+        currentX = clientX;
+        track.classList.add("is-dragging");
+      }
+
+      function onMove(clientX) {
+        if (!dragging) return;
+        currentX = clientX;
+        var delta = currentX - startX;
+        track.style.transform =
+          "translateX(calc(" + (-index * 100) + "% + " + delta + "px))";
+      }
+
+      function onEnd() {
+        if (!dragging) return;
+        var delta = currentX - startX;
+        if (Math.abs(delta) > 60) {
+          index += delta < 0 ? 1 : -1;
+        }
+        clampIndex();
+        dragging = false;
+        track.classList.remove("is-dragging");
+        update();
+      }
+
+      prev.addEventListener("click", function () {
+        go(-1);
+      });
+      next.addEventListener("click", function () {
+        go(1);
+      });
+
+      stage.addEventListener("mousedown", function (event) {
+        onStart(event.clientX);
+      });
+      window.addEventListener("mousemove", function (event) {
+        onMove(event.clientX);
+      });
+      window.addEventListener("mouseup", function () {
+        onEnd();
+      });
+
+      stage.addEventListener("touchstart", function (event) {
+        if (event.touches.length === 1) {
+          onStart(event.touches[0].clientX);
+        }
+      });
+      stage.addEventListener("touchmove", function (event) {
+        if (event.touches.length === 1) {
+          onMove(event.touches[0].clientX);
+        }
+      });
+      stage.addEventListener("touchend", function () {
+        onEnd();
+      });
+
+      update();
+    })();
+  </script>
+{% endblock %}

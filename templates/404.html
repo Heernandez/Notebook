@@ -1,0 +1,11 @@
+{% extends "Book/base.html" %}
+
+{% block title %}Page not found{% endblock %}
+
+{% block content %}
+  <section class="empty-state">
+    <h1>That page does not exist</h1>
+    <p>The book you are looking for might be private or removed.</p>
+    <a class="btn btn-primary" href="{% url 'Book:public_list' %}">Go to home</a>
+  </section>
+{% endblock %}
