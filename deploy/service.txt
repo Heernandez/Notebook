@@ -1,0 +1,35 @@
+Gunicorn systemd service setup
+==============================
+
+1) Create/activate venv and install gunicorn
+   cd /var/www/notebook
+   python3 -m venv .venv
+   source .venv/bin/activate
+   pip install -r requirements.txt
+   pip install gunicorn
+
+2) Create the service file
+   sudo nano /etc/systemd/system/notebook.service
+
+3) Paste this (adjust user + paths)
+   [Unit]
+   Description=Note-Book gunicorn service
+   After=network.target
+
+   [Service]
+   User=ubuntu
+   Group=www-data
+   WorkingDirectory=/var/www/notebook
+   Environment="PATH=/var/www/notebook/.venv/bin"
+   ExecStart=/var/www/notebook/.venv/bin/gunicorn notebook.wsgi:application --bind 127.0.0.1:8001 --workers 3
+   Restart=always
+   RestartSec=5
+
+   [Install]
+   WantedBy=multi-user.target
+
+4) Enable and start
+   sudo systemctl daemon-reload
+   sudo systemctl start notebook
+   sudo systemctl enable notebook
+   sudo systemctl status notebook

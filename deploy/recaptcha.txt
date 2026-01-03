@@ -1,0 +1,29 @@
+Recaptcha setup (v3) steps
+==========================
+
+1) Go to Google reCAPTCHA admin
+   https://www.google.com/recaptcha/admin/create
+
+2) Create a new site
+   - reCAPTCHA type: v3
+   - Add domains:
+     * note-book.co
+     * www.note-book.co
+     * localhost (for dev)
+     * 127.0.0.1 (for dev)
+
+3) Copy keys
+   - Site key
+   - Secret key
+
+4) Add keys to .env
+   RECAPTCHA_SITE_KEY=your_site_key
+   RECAPTCHA_SECRET_KEY=your_secret_key
+   RECAPTCHA_THRESHOLD=0.5
+
+5) Restart the app
+   sudo systemctl restart notebook
+
+Notes
+- If you get "score too low" in dev, lower RECAPTCHA_THRESHOLD (e.g. 0.1).
+- For prod, keep the threshold higher (0.5+).

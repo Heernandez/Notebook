@@ -1,0 +1,19 @@
+Let's Encrypt SSL steps
+=======================
+
+1) Install certbot
+   sudo apt update
+   sudo apt install certbot python3-certbot-nginx
+
+2) Ensure Nginx is serving HTTP (port 80)
+   - server_name must include note-book.co and www.note-book.co
+
+3) Run certbot
+   sudo certbot --nginx -d note-book.co -d www.note-book.co
+
+4) Test auto-renewal
+   sudo certbot renew --dry-run
+
+Notes
+- If certbot errors with duplicate listen 443, make sure your config is only HTTP
+  (listen 80) before running certbot.

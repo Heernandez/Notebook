@@ -1,0 +1,34 @@
+Nginx reverse proxy setup
+=========================
+
+1) Create the config file
+   sudo nano /etc/nginx/sites-available/notebook
+
+2) Example config (HTTP only)
+   server {
+       listen 80;
+       server_name note-book.co www.note-book.co;
+
+       location / {
+           proxy_pass http://127.0.0.1:8001;
+           proxy_set_header Host $host;
+           proxy_set_header X-Real-IP $remote_addr;
+           proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+           proxy_set_header X-Forwarded-Proto $scheme;
+       }
+
+       location /static/ {
+           alias /var/www/notebook/staticfiles/;
+       }
+   }
+
+3) Enable the site
+   sudo ln -s /etc/nginx/sites-available/notebook /etc/nginx/sites-enabled/notebook
+
+4) Test and reload
+   sudo nginx -t
+   sudo systemctl reload nginx
+
+Notes
+- Update server_name if you change domains.
+- Adjust the alias path if your project lives elsewhere.
