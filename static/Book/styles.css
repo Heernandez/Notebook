@@ -341,15 +341,16 @@ img {
 
 .detail-hero {
   display: grid;
-  grid-template-columns: minmax(260px, 1fr) minmax(300px, 1.4fr);
+  grid-template-columns: 1fr;
   gap: 32px;
-  align-items: center;
+  align-items: start;
   margin-bottom: 32px;
 }
 
 .detail-info-stack {
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: 16px;
 }
 
@@ -531,6 +532,13 @@ img {
   justify-content: space-between;
   gap: 12px;
   margin-bottom: 12px;
+}
+
+.leaf-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  color: inherit;
 }
 
 .leaf-page img {
@@ -896,13 +904,27 @@ img {
   background: rgba(255, 255, 255, 0.7);
 }
 
+.form-group input[type="checkbox"] {
+  width: auto;
+  padding: 0;
+  border-radius: 4px;
+}
+
 .form-group textarea {
   min-height: 140px;
   resize: vertical;
 }
 
-.inline-toggle {
-  margin-top: 18px;
+.toggle {
+  display: flex;
+  justify-content: flex-start;
+  align-items: baseline;
+  flex-direction: row;
+  gap: 8px;
+}
+
+.checkbox {
+  width: auto;
 }
 
 .counter {
@@ -956,18 +978,16 @@ input[type="file"][id="id_cover_image"] {
   gap: 16px;
 }
 
-.toggle {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  justify-content: flex-start;
-}
 
 .form-actions {
   display: flex;
   gap: 12px;
   align-items: center;
   justify-content: center;
+}
+
+.form-actions .btn {
+  min-width: 140px;
 }
 
 @keyframes float {

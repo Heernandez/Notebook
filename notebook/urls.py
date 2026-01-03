@@ -18,11 +18,13 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.contrib.auth.views import LogoutView
+from django.shortcuts import redirect
 from django.urls import include, path
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path("accounts/logout/", LogoutView.as_view(next_page="/"), name="logout"),
+    path("accounts/3rdparty/login/cancelled/", lambda request: redirect("/"), name="social_login_cancelled"),
     path("accounts/", include("User.urls")),
     path("accounts/", include("allauth.urls")),
     path("accounts/", include("django.contrib.auth.urls")),

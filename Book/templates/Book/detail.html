@@ -21,7 +21,7 @@
             </span>
           </div>
         </div>
-        <div class="detail-main">
+        <div class="detail-actions-column">
           <div class="detail-cover">
             {% if book.cover_image %}
               <img src="{{ book.cover_image.url }}" alt="Cover for {{ book.title }}" />
@@ -29,9 +29,9 @@
               <div class="cover-placeholder cover-placeholder--large">No cover</div>
             {% endif %}
           </div>
-          <div class="detail-main-info">
-            <p class="detail-summary">Description:<br>{{ book.description|default:"No description yet" }}</p>
-          </div>
+        </div>
+        <div class="detail-actions-column">
+          <p class="detail-summary">{{ book.description|default:"No description yet" }}</p>
         </div>
         <div class="detail-actions-column">
           <p class="meta">By {{ book.owner.first_name }} {{ book.owner.last_name }} · Updated {{ book.updated_at|date:"M d, Y" }}</p>  
@@ -94,37 +94,16 @@
           {% for leaf in leaves %}
             <article class="leaf-page">
               <div class="leaf-meta">
-                {% if leaf_order == "oldest" %}
-                  <span class="chip chip-public">Leaf {{ forloop.counter }}</span>
-                {% else %}
-                  <span class="chip chip-public">Leaf {{ forloop.revcounter }}</span>
-                {% endif %}
-                <span class="meta">Added {{ leaf.created_at|date:"M d, Y" }}</span>
+                <a class="leaf-link" href="{% url 'Book:reader' book.pk %}?leaf={{ leaf.pk }}">
+                  {% if leaf_order == "oldest" %}
+                    <span class="chip chip-public">Leaf {{ forloop.counter }}</span>
+                  {% else %}
+                    <span class="chip chip-public">Leaf {{ forloop.revcounter }}</span>
+                  {% endif %}
+                  <span class="meta">Added {{ leaf.created_at|date:"M d, Y" }}</span>
+                </a>
               </div>
-              {% if leaf.images.exists %}
-                {% if leaf.images.count > 1 %}
-                  <div class="leaf-slider" data-leaf-slider>
-                    <div class="leaf-slider-track">
-                      {% for image in leaf.images.all %}
-                        <img src="{{ image.image.url }}" alt="Leaf image" />
-                      {% endfor %}
-                    </div>
-                    <button class="slider-btn slider-prev" type="button">Prev</button>
-                    <button class="slider-btn slider-next" type="button">Next</button>
-                  </div>
-                {% else %}
-                  <div class="leaf-gallery">
-                    {% for image in leaf.images.all %}
-                      <img src="{{ image.image.url }}" alt="Leaf image" />
-                    {% endfor %}
-                  </div>
-                {% endif %}
-              {% endif %}
-              {% if leaf.text %}
-                <div class="leaf-text">
-                  {{ leaf.text|linebreaks }}
-                </div>
-              {% endif %}
+              {# no leaf content shown here #}
               {% if user == book.owner %}
                 <div class="card-actions">
                   <a class="btn btn-ghost" href="{% url 'Book:edit_leaf' leaf.pk %}">Edit leaf</a>

@@ -29,7 +29,7 @@
           <button class="reader-nav reader-prev" type="button">Prev</button>
           <div class="reader-track">
             {% for leaf in leaves %}
-              <article class="reader-page">
+              <article class="reader-page" data-leaf-id="{{ leaf.pk }}">
                 <div class="leaf-meta">
                   <span class="chip chip-public">Leaf {{ forloop.counter }}</span>
                   <span class="meta">{{ leaf.created_at|date:"M d, Y" }}</span>
@@ -90,6 +90,21 @@
         index += delta;
         clampIndex();
         update();
+      }
+
+      var params = new URLSearchParams(window.location.search);
+      var leafId = params.get("leaf");
+      console.log("[reader] requested leaf id:", leafId);
+      if (leafId) {
+        Array.from(pages).some(function (page, idx) {
+          if (page.getAttribute("data-leaf-id") === leafId) {
+            console.log("[reader] matched leaf id at index:", idx);
+            index = idx;
+            console.log("[reader] final index:", index);
+            return true;
+          }
+          return false;
+        });
       }
 
       function onStart(clientX) {

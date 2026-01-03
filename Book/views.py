@@ -74,6 +74,8 @@ class BookReaderView(BookDetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["hide_topbar"] = True
+        context["leaves"] = Leaf.objects.filter(book=self.object).order_by("created_at")
+        context["leaf_order"] = "oldest"
         return context
 
 
