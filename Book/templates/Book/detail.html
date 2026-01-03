@@ -1,4 +1,5 @@
 {% extends "Book/base.html" %}
+{% load static %}
 
 {% block title %}{{ book.title }}{% endblock %}
 
@@ -11,31 +12,66 @@
     </section>
   {% else %}
     <section class="detail-hero">
-      <div class="detail-cover">
-        {% if book.cover_image %}
-          <img src="{{ book.cover_image.url }}" alt="Cover for {{ book.title }}" />
-        {% else %}
-          <div class="cover-placeholder cover-placeholder--large">No cover</div>
-        {% endif %}
-      </div>
-      <div class="detail-info">
+      <div class="detail-info-stack">
         <div class="detail-title">
           <h1>{{ book.title }}</h1>
-          <span class="chip {% if book.is_public %}chip-public{% else %}chip-private{% endif %}">
-            {% if book.is_public %}Public{% else %}Private{% endif %}
-          </span>
+          <div class="detail-status">
+            <span class="chip {% if book.is_public %}chip-public{% else %}chip-private{% endif %}">
+              {% if book.is_public %}Public{% else %}Private{% endif %}
+            </span>
+          </div>
         </div>
-        <p class="meta">By {{ book.owner.first_name }} {{ book.owner.last_name }} · Updated {{ book.updated_at|date:"M d, Y" }}</p>
-        <p>{{ book.description|default:"No description yet" }}</p>
+        <div class="detail-main">
+          <div class="detail-cover">
+            {% if book.cover_image %}
+              <img src="{{ book.cover_image.url }}" alt="Cover for {{ book.title }}" />
+            {% else %}
+              <div class="cover-placeholder cover-placeholder--large">No cover</div>
+            {% endif %}
+          </div>
+          <div class="detail-main-info">
+            <p class="detail-summary">Description:<br>{{ book.description|default:"No description yet" }}</p>
+          </div>
+        </div>
+        <div class="detail-actions-column">
+          <p class="meta">By {{ book.owner.first_name }} {{ book.owner.last_name }} · Updated {{ book.updated_at|date:"M d, Y" }}</p>  
+        </div>
+        <div class="detail-actions-column">
+          <a class="btn btn-ghost" href="{% url 'Book:reader' book.pk %}">Read</a>
+          <button class="btn btn-ghost icon-btn" type="button" aria-label="Save favorite" data-favorite-toggle>
+            <img
+              src="{% static 'Book/unsaved.png' %}"
+              data-unsaved-src="{% static 'Book/unsaved.png' %}"
+              data-saved-src="{% static 'Book/saved.png' %}"
+              alt=""
+              aria-hidden="true"
+            />
+           <!----Save -->
+          </button>
+          <div class="rating-widget" aria-label="Rate this book">
+            <div class="rating-stars" data-rating-stars>
+              <span class="rating-base">★★★★★</span>
+              <span class="rating-fill" data-rating-fill>★★★★★</span>
+            </div>
+            <input
+              class="rating-input"
+              type="range"
+              min="0"
+              max="5"
+              step="0.5"
+              value="0"
+              aria-label="Rating from 0 to 5"
+              data-rating-input
+            />
+            <span class="meta rating-value" data-rating-value>0</span>
+          </div>
+        </div>
         {% if user == book.owner %}
           <div class="detail-actions">
             <a class="btn btn-primary" href="{% url 'Book:edit' book.pk %}">Edit book</a>
             <a class="btn btn-ghost" href="{% url 'Book:add_leaf' book.pk %}">Add leaf</a>
           </div>
         {% endif %}
-        <div class="detail-actions">
-          <a class="btn btn-ghost" href="{% url 'Book:reader' book.pk %}">Open reader</a>
-        </div>
       </div>
     </section>
 
@@ -123,6 +159,57 @@
         });
         update();
       });
+    })();
+  </script>
+  <script>
+    (function () {
+      var btn = document.querySelector("[data-favorite-toggle]");
+      if (!btn) return;
+      var img = btn.querySelector("img");
+      if (!img) return;
+      var saved = false;
+      btn.addEventListener("click", function () {
+        saved = !saved;
+        img.src = saved ? img.dataset.savedSrc : img.dataset.unsavedSrc;
+      });
+    })();
+  </script>
+  <script>
+    (function () {
+      var input = document.querySelector("[data-rating-input]");
+      var fill = document.querySelector("[data-rating-fill]");
+      var stars = document.querySelector("[data-rating-stars]");
+      var value = document.querySelector("[data-rating-value]");
+      if (!input || !fill || !stars) return;
+
+      function update() {
+        var current = parseFloat(input.value || "0");
+        fill.style.width = (current / 5) * 100 + "%";
+        if (value) value.textContent = current.toFixed(1);
+      }
+
+      function setFromEvent(event) {
+        var rect = stars.getBoundingClientRect();
+        var x = Math.max(0, Math.min(event.clientX - rect.left, rect.width));
+        var percent = x / rect.width;
+        var raw = percent * 5;
+        var stepped = Math.round(raw * 2) / 2;
+        input.value = stepped.toFixed(1);
+        update();
+      }
+
+      stars.addEventListener("click", function (event) {
+        setFromEvent(event);
+      });
+
+      stars.addEventListener("mousemove", function (event) {
+        if (event.buttons === 1) {
+          setFromEvent(event);
+        }
+      });
+
+      input.addEventListener("input", update);
+      update();
     })();
   </script>
 {% endblock %}

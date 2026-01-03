@@ -11,6 +11,7 @@
     <div class="bg-orbit bg-orbit--a"></div>
     <div class="bg-orbit bg-orbit--b"></div>
 
+    {% load social_status %}
     {% if not hide_topbar %}
       <header class="topbar">
         <a class="logo" href="{% url 'Book:public_list' %}">
@@ -23,15 +24,24 @@
             <a class="btn btn-primary" href="{% url 'Book:create' %}">New book</a>
           {% endif %}
         </nav>
-        <div class="user-chip">
+        <div style="display: flex;flex-direction: row;flex-wrap: nowrap;align-content: center;justify-content: space-between;align-items: center;">
           {% if user.is_authenticated %}
             <span>Hi, {{ user.first_name }} {{ user.last_name }}</span>
+            <span style="width: 16px;"></span>
+
+            {% has_social_connections as has_connections %}
+            {% if not has_connections %}
+              <a href="{% url 'socialaccount_connections' %}">Connect Google</a>
+            {% endif %}
             <form method="post" action="/accounts/logout/" class="logout-form">
               {% csrf_token %}
               <button class="btn btn-ghost" type="submit">Log out</button>
             </form>
           {% else %}
             <a href="/accounts/login/">Log in</a>
+            <span style="width: 16px;"></span>
+            <p>|</p>
+            <span style="width: 16px;"></span>
             <a href="{% url 'User:signup' %}">Register</a>
           {% endif %}
         </div>

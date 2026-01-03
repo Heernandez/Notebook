@@ -1,0 +1,58 @@
+{% extends "Book/base.html" %}
+{% load socialaccount %}
+
+{% block title %}Account connections{% endblock %}
+
+{% block content %}
+  <section class="form-shell">
+    <div class="form-card">
+      <h1>Account connections</h1>
+      <p>Link your social accounts to sign in faster.</p>
+
+      {% if form.accounts %}
+        <form method="post">
+          {% csrf_token %}
+          <div class="image-grid">
+            {% for account in form.accounts %}
+              <div class="image-card">
+                <strong>{{ account.provider }}</strong>
+                <span class="meta">{{ account.extra_data.email|default:account.uid }}</span>
+                <label class="toggle">
+                  {{ account }}
+                  <span>Disconnect</span>
+                </label>
+              </div>
+            {% endfor %}
+          </div>
+          <div class="form-actions">
+            <button class="btn btn-primary" type="submit">Update connections</button>
+          </div>
+        </form>
+      {% else %}
+        <p class="meta">No social accounts connected yet.</p>
+      {% endif %}
+
+      {% if not form.accounts %}
+        {% get_providers as socialaccount_providers %}
+        {% if socialaccount_providers %}
+          <div class="divider">
+            <span>Connect a new provider</span>
+          </div>
+          <div class="social-actions">
+            {% for provider in socialaccount_providers %}
+              {% if provider.id == "google" %}
+                <a class="btn btn-ghost" href="{% provider_login_url provider.id %}">Google</a>
+              {% endif %}
+              {% if provider.id == "apple" %}
+                <a class="btn btn-ghost" href="{% provider_login_url provider.id %}">Apple</a>
+              {% endif %}
+              {% if provider.id == "microsoft" %}
+                <a class="btn btn-ghost" href="{% provider_login_url provider.id %}">Outlook</a>
+              {% endif %}
+            {% endfor %}
+          </div>
+        {% endif %}
+      {% endif %}
+    </div>
+  </section>
+{% endblock %}
