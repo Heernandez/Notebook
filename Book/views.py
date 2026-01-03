@@ -145,7 +145,7 @@ class LeafCreateView(LoginRequiredMixin, CreateView):
         return context
 
     def get_success_url(self):
-        return reverse_lazy("Book:edit", kwargs={"pk": self.book.pk})
+        return reverse_lazy("Book:detail", kwargs={"pk": self.book.pk})
 
 
 class LeafUpdateView(LoginRequiredMixin, UpdateView):
@@ -168,6 +168,11 @@ class LeafUpdateView(LoginRequiredMixin, UpdateView):
             return render(request, "Book/leaf_edit.html", context, status=404)
         context = self.get_context_data(object=self.object)
         return self.render_to_response(context)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["image_form"] = LeafImageUploadForm()
+        return context
 
     def form_valid(self, form):
         response = super().form_valid(form)

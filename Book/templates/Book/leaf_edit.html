@@ -23,8 +23,8 @@
             <div class="meta counter" data-counter-for="{{ form.text.id_for_label }}"></div>
           </div>
           <div class="form-group">
-            <label for="id_images">Photos</label>
-            <input id="id_images" name="images" type="file" multiple />
+            <label for="{{ image_form.images.id_for_label }}">Photos</label>
+            {{ image_form.images }}
             <span class="meta">You can select multiple photos.</span>
             <div class="image-preview" data-preview-list></div>
           </div>
@@ -74,7 +74,7 @@
     </script>
     <script>
       (function () {
-        var input = document.getElementById("id_images");
+      var input = document.getElementById("{{ image_form.images.id_for_label }}");
         var list = document.querySelector("[data-preview-list]");
         if (!input || !list) return;
 
