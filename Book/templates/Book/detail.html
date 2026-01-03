@@ -1,7 +1,7 @@
 {% extends "Book/base.html" %}
 {% load static %}
 
-{% block title %}{{ book.title }}{% endblock %}
+{% block title %}{{ book.title }} · Note-Book{% endblock %}
 
 {% block content %}
   {% if book_missing %}

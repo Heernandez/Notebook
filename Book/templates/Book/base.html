@@ -4,7 +4,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>{% block title %}Book{% endblock %}</title>
+    <title>{% block title %}Note-Book{% endblock %}</title>
     <link rel="stylesheet" href="{% static 'Book/styles.css' %}" />
   </head>
   <body class="{% block body_class %}{% endblock %}">
@@ -15,7 +15,7 @@
     {% if not hide_topbar %}
       <header class="topbar">
         <a class="logo" href="{% url 'Book:public_list' %}">
-          <span>Book</span>
+        <span>Note-Book</span>
         </a>
         <nav class="nav-links">
           <a href="{% url 'Book:public_list' %}">Explore</a>
@@ -51,5 +51,11 @@
     <main class="page">
       {% block content %}{% endblock %}
     </main>
+    <footer class="footer">
+      <div class="footer-inner">
+        <span>Note-Book · Your learning notebook</span>
+        <span class="meta">Built with care · 2026</span>
+      </div>
+    </footer>
   </body>
 </html>

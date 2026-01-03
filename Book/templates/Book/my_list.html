@@ -1,14 +1,14 @@
 {% extends "Book/base.html" %}
 
-{% block title %}My books{% endblock %}
+{% block title %}My notebooks · Note-Book{% endblock %}
 
 {% block content %}
   <section class="hero">
     <div>
-      <h1>My books</h1>
+      <h1>My notebooks</h1>
       <p>Manage your notes and choose if they are private or public.</p>
     </div>
-    <a class="btn btn-primary" href="{% url 'Book:create' %}">New book</a>
+    <a class="btn btn-primary" href="{% url 'Book:create' %}">New notebook</a>
   </section>
 
   {% if books %}
@@ -43,9 +43,9 @@
     </section>
   {% else %}
     <div class="empty-state">
-      <h3>You do not have any books yet</h3>
+      <h3>You do not have any notebooks yet</h3>
       <p>Create one to start saving your notes.</p>
-      <a class="btn btn-primary" href="{% url 'Book:create' %}">Create book</a>
+      <a class="btn btn-primary" href="{% url 'Book:create' %}">Create notebook</a>
     </div>
   {% endif %}
 {% endblock %}

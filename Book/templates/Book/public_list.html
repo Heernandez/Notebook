@@ -1,11 +1,11 @@
 {% extends "Book/base.html" %}
 
-{% block title %}Explore books{% endblock %}
+{% block title %}Explore notebooks · Note-Book{% endblock %}
 
 {% block content %}
   <section class="hero">
     <div>
-      <h1>Explore public books</h1>
+      <h1>Explore public notebooks</h1>
       <p>Ideas, notes, and photos organized by people like you.</p>
     </div>
     <form class="search" method="get">
@@ -37,10 +37,10 @@
     </section>
   {% else %}
     <div class="empty-state">
-      <h3>No public books yet</h3>
-      <p>Be the first to share a book.</p>
+      <h3>No public notebooks yet</h3>
+      <p>Be the first to share a notebook.</p>
       {% if user.is_authenticated %}
-        <a class="btn btn-primary" href="{% url 'Book:create' %}">Create my book</a>
+        <a class="btn btn-primary" href="{% url 'Book:create' %}">Create my notebook</a>
       {% endif %}
     </div>
   {% endif %}
