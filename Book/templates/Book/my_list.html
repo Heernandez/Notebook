@@ -31,4 +31,42 @@
       <p class="empty-state">No books yet.</p>
     {% endfor %}
   </section>
+  <section class="library-section">
+    <div class="library-section-head">
+      <div>
+        <h2 class="library-section-title">Saved books</h2>
+        <p class="library-section-subtitle">
+          Books from other creators you have saved as favorites.
+        </p>
+      </div>
+    </div>
+    <div class="book-grid">
+      {% for book in saved_books %}
+        <article class="book-card">
+          <a class="book-card-link" href="{% url 'Book:detail' book.pk %}">
+            <div class="book-cover">
+              {% if book.cover_image %}
+                <img src="{{ book.cover_image.url }}" alt="Cover for {{ book.title }}" />
+              {% else %}
+                <div class="cover-placeholder">No cover</div>
+              {% endif %}
+            </div>
+            <h3 class="book-title">{{ book.title }}</h3>
+            <div class="book-rating">
+              <span class="rating-star" aria-hidden="true"></span>
+              <span class="rating-value">
+                {% if book.avg_rating %}
+                  {{ book.avg_rating|floatformat:1 }}
+                {% else %}
+                  5
+                {% endif %}
+              </span>
+            </div>
+          </a>
+        </article>
+      {% empty %}
+        <p class="empty-state">No saved books yet.</p>
+      {% endfor %}
+    </div>
+  </section>
 {% endblock %}

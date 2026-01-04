@@ -9,6 +9,7 @@ urlpatterns = [
     path("mine/", views.MyBookListView.as_view(), name="my_list"),
     path("new/", views.BookCreateView.as_view(), name="create"),
     path("<int:pk>/", views.BookDetailView.as_view(), name="detail"),
+    path("<int:pk>/save/", views.toggle_saved_book, name="toggle_saved"),
     path("<int:pk>/edit/", views.BookUpdateView.as_view(), name="edit"),
     path("<int:pk>/reader/", views.BookReaderView.as_view(), name="reader"),
     path("<int:pk>/add-leaf/", views.LeafCreateView.as_view(), name="add_leaf"),

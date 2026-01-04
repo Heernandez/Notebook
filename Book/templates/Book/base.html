@@ -22,8 +22,8 @@
             </a>
             -->
           </div>
-          <form class="header-search" method="get" action="#">
-            <input type="search" name="q" placeholder="Search books, creators, themes" />
+          <form class="header-search" method="get" action="{{ request.path }}">
+            <input type="search" name="q" placeholder="Search books, creators, themes" value="{{ request.GET.q|default:"" }}" />
             <button type="submit" aria-label="Search">
               <span class="search-text">Search</span>
               <span class="search-icon" aria-hidden="true"></span>
@@ -41,22 +41,32 @@
     <main class="{% block main_class %}{% endblock %}">
       {% block toolbar %}
         <div class="body-toolbar">
-          <label class="category-select">
-            <span>Category</span>
-            <select name="category">
-              <option>All</option>
-              <option>Fiction</option>
-              <option>Non-fiction</option>
-              <option>Poetry</option>
-              <option>Essays</option>
-            </select>
-          </label>
+          <form
+            class="category-filter"
+            method="get"
+            action="{% if request.resolver_match and request.resolver_match.url_name == 'my_list' %}{% url 'Book:my_list' %}{% else %}{% url 'Book:public_list' %}{% endif %}"
+            data-category-filter
+          >
+            <label class="category-select">
+              <span>Category</span>
+              <select name="category">
+                <option value="">All</option>
+                {% for category in categories %}
+                  <option
+                    value="{{ category.pk }}"
+                    {% if request.GET.category == category.pk|stringformat:"s" %}selected{% endif %}
+                  >
+                    {{ category.name }}
+                  </option>
+                {% endfor %}
+              </select>
+            </label>
+          </form>
           {% if request.resolver_match and request.resolver_match.url_name == "my_list" %}
             <a class="library-btn" href="{% url 'Book:public_list' %}">Library</a>
           {% else %}
             <a class="library-btn" href="{% url 'Book:my_list' %}">My Library</a>
           {% endif %}
-          <a class="library-btn" href="{% url 'Book:create' %}">New Book</a>
         </div>
       {% endblock %}
       {% block content %}{% endblock %}
@@ -100,6 +110,15 @@
           if (!menu.contains(event.target)) {
             closeMenu();
           }
+        });
+      })();
+      (function () {
+        var filterForm = document.querySelector("[data-category-filter]");
+        if (!filterForm) return;
+        var select = filterForm.querySelector("select[name='category']");
+        if (!select) return;
+        select.addEventListener("change", function () {
+          filterForm.submit();
         });
       })();
     </script>
