@@ -1,10 +1,12 @@
 {% extends "Book/base.html" %}
-{% load static %}
+{% load static social_status %}
 
 {% block title %}Book · Note-Book{% endblock %}
 
 {% block content %}
-  <a class="reader-back" href="{% url 'Book:public_list' %}" aria-label="Back">←</a>
+  <a class="reader-back" href="{% url 'Book:public_list' %}" aria-label="Back">
+    <img src="{% static 'back.png' %}" alt="" aria-hidden="true" />
+  </a>
   <section class="detail-layout">
     <div class="detail-cover">
       {% if book.cover_image %}
@@ -77,8 +79,13 @@
           {% with reviewer_name=review.user.get_full_name|default:review.user.username|default:"Anonymous" %}
             <li class="detail-review-card">
               <div class="detail-review-header">
+                {% user_avatar_url review.user as reviewer_avatar_url %}
                 <span class="detail-review-avatar" aria-hidden="true">
-                  {{ reviewer_name|slice:":1"|upper }}
+                  {% if reviewer_avatar_url %}
+                    <img src="{{ reviewer_avatar_url }}" alt="" />
+                  {% else %}
+                    {{ reviewer_name|slice:":1"|upper }}
+                  {% endif %}
                 </span>
                 <span class="detail-review-name">{{ reviewer_name }}</span>
               </div>
@@ -86,6 +93,9 @@
                 <span class="detail-review-stars">{{ review.rating }} ★</span>
                 <span class="detail-review-date">{{ review.created_at|date:"d F Y" }}</span>
               </div>
+              {% if review.comment %}
+                <p class="detail-review-comment">{{ review.comment }}</p>
+              {% endif %}
             </li>
           {% endwith %}
         {% endfor %}

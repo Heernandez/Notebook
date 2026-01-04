@@ -102,6 +102,7 @@ class BookDetailView(DetailView):
         context["reviews"] = (
             Review.objects.filter(book=self.object)
             .select_related("user")
+            .prefetch_related("user__socialaccount_set")
             .order_by("-rating", "-created_at")[:3]
         )
         rating_qs = Review.objects.filter(book=self.object)

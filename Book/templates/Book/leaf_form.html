@@ -8,7 +8,9 @@
 {% block content %}
   <section class="editor-shell">
     <header class="editor-header">
-      <a class="reader-back" href="{% url 'Book:detail' book.pk %}" aria-label="Back">←</a>
+      <a class="reader-back" href="{% url 'Book:detail' book.pk %}" aria-label="Back">
+        <img src="{% static 'back.png' %}" alt="" aria-hidden="true" />
+      </a>
       <h1>Create a new leaf</h1>
       <p>Write freely and drop images into the page.</p>
     </header>

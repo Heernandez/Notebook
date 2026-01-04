@@ -6,7 +6,9 @@
 {% block header %}
   <header class="topbar reader-topbar">
     <div class="reader-bar">
-      <a class="reader-back" href="{% url 'Book:detail' book.pk %}" aria-label="Back">←</a>
+      <a class="reader-back" href="{% url 'Book:detail' book.pk %}" aria-label="Back">
+        <img src="{% static 'back.png' %}" alt="" aria-hidden="true" />
+      </a>
       <h1 class="reader-title">{{ book.title }}</h1>
       {% if user == book.owner and leaves %}
         <a class="reader-edit" href="{% url 'Book:edit_leaf' leaves.0.pk %}" data-edit-link>Edit</a>

@@ -1,4 +1,4 @@
-{% load static %}
+{% load static social_status %}
 <!DOCTYPE html>
 <html lang="es">
   <head>
@@ -12,8 +12,13 @@
       <header class="topbar">
         <div class="topbar-row">
           <div class="topbar-left">
+          {% user_avatar_url user as menu_avatar_url %}
           <button class="icon-btn" type="button" aria-label="Profile" data-profile-toggle>
-            <span class="icon-circle"></span>
+            {% if menu_avatar_url %}
+              <img class="icon-avatar" src="{{ menu_avatar_url }}" alt="{{ user.get_full_name|default:user.username|default:'Profile' }}" />
+            {% else %}
+              <span class="icon-circle"></span>
+            {% endif %}
           </button>
             <!--
             <a class="brand" href="#">
@@ -22,13 +27,15 @@
             </a>
             -->
           </div>
-          <form class="header-search" method="get" action="{{ request.path }}">
-            <input type="search" name="q" placeholder="Search books, creators, themes" value="{{ request.GET.q|default:"" }}" />
-            <button type="submit" aria-label="Search">
-              <span class="search-text">Search</span>
-              <span class="search-icon" aria-hidden="true"></span>
-            </button>
-          </form>
+          {% block header_search %}
+            <form class="header-search" method="get" action="{{ request.path }}">
+              <input type="search" name="q" placeholder="Search books, creators, themes" value="{{ request.GET.q|default:"" }}" />
+              <button type="submit" aria-label="Search">
+                <span class="search-text">Search</span>
+                <span class="search-icon" aria-hidden="true"></span>
+              </button>
+            </form>
+          {% endblock %}
           {% if user.is_authenticated %}
             <button class="icon-btn" type="button" aria-label="Notifications">
               <span class="icon-bell"></span>
@@ -72,10 +79,19 @@
       {% block content %}{% endblock %}
     </main>
     <div class="profile-menu" data-profile-menu>
+      <a href="/">Home</a>
       {% if user.is_authenticated %}
         <div class="profile-header">
-          <span class="profile-avatar"></span>
-          <span class="profile-name">{{ user.first_name }} {{ user.last_name }}</span>
+          {% with profile_name=user.get_full_name|default:user.username|default:"Profile" %}
+            <span class="profile-avatar">
+              {% if menu_avatar_url %}
+                <img src="{{ menu_avatar_url }}" alt="{{ profile_name }}" />
+              {% else %}
+                {{ profile_name|slice:":1"|upper }}
+              {% endif %}
+            </span>
+            <span class="profile-name">{{ profile_name }}</span>
+          {% endwith %}
         </div>
         <a href="#">My profile</a>
         <a href="{% url 'Book:my_list' %}">My Library</a>
