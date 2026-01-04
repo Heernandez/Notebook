@@ -13,7 +13,9 @@
 {% block content %}
   <section class="form-shell">
     <div class="form-card">
-      <a class="reader-back form-back" href="{% url 'Book:my_list' %}" aria-label="Back">←</a>
+      <a class="reader-back form-back" href="{% url 'Book:my_list' %}" aria-label="Back">
+        <img src="{% static 'back.png' %}" alt="" aria-hidden="true" />
+      </a>
       {% if form.instance.pk %}
         <h1>Edit book</h1>
         <p>Update the details for this notebook.</p>

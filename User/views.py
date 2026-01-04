@@ -132,11 +132,18 @@ def signup(request):
         request.session["pending_user_id"] = user.id
         return redirect("User:verify_otp")
 
-    list(messages.get_messages(request))
+    filtered_messages = []
+    for message in messages.get_messages(request):
+        if "Successfully signed in as" in str(message):
+            continue
+        filtered_messages.append(message)
     return render(
         request,
         "User/signup.html",
-        {"recaptcha_site_key": settings.RECAPTCHA_SITE_KEY},
+        {
+            "recaptcha_site_key": settings.RECAPTCHA_SITE_KEY,
+            "signup_messages": filtered_messages,
+        },
     )
 
 

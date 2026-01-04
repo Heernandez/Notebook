@@ -1,18 +1,21 @@
 {% extends "Book/base.html" %}
-{% load socialaccount %}
+{% load socialaccount static %}
 
 {% block title %}Create account · Note-Book{% endblock %}
 {% block toolbar %}{% endblock %}
+{% block header_search %}{% endblock %}
 
 {% block content %}
   <section class="form-shell">
     <div class="form-card">
-      <a class="reader-back form-back" href="{% url 'Book:public_list' %}" aria-label="Back">←</a>
+      <a class="reader-back form-back" href="{% url 'Book:public_list' %}" aria-label="Back">
+        <img src="{% static 'back.png' %}" alt="" aria-hidden="true" />
+      </a>
       <h1>Create your account</h1>
       <p>Use your email as your username.</p>
-      {% if messages %}
+      {% if signup_messages %}
         <div class="alert">
-          {% for message in messages %}
+          {% for message in signup_messages %}
             <p>{{ message }}</p>
           {% endfor %}
         </div>
