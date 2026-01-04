@@ -5,57 +5,108 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{% block title %}Note-Book{% endblock %}</title>
-    <link rel="stylesheet" href="{% static 'Book/styles.css' %}" />
+    <link rel="stylesheet" href="{% static 'Book/base.css' %}" />
   </head>
   <body class="{% block body_class %}{% endblock %}">
-    <div class="bg-orbit bg-orbit--a"></div>
-    <div class="bg-orbit bg-orbit--b"></div>
-
-    {% load social_status %}
-    {% if not hide_topbar %}
+    {% block header %}
       <header class="topbar">
-        <a class="logo" href="{% url 'Book:public_list' %}">
-        <span>Note-Book</span>
-        </a>
-        <nav class="nav-links">
-          <a href="{% url 'Book:public_list' %}">Explore</a>
+        <div class="topbar-row">
+          <div class="topbar-left">
+          <button class="icon-btn" type="button" aria-label="Profile" data-profile-toggle>
+            <span class="icon-circle"></span>
+          </button>
+            <!--
+            <a class="brand" href="#">
+              <span class="brand-mark"></span>
+              <span>Note-Book</span>
+            </a>
+            -->
+          </div>
+          <form class="header-search" method="get" action="#">
+            <input type="search" name="q" placeholder="Search books, creators, themes" />
+            <button type="submit" aria-label="Search">
+              <span class="search-text">Search</span>
+              <span class="search-icon" aria-hidden="true"></span>
+            </button>
+          </form>
           {% if user.is_authenticated %}
-            <a href="{% url 'Book:my_list' %}">My books</a>
-            <a class="btn btn-primary" href="{% url 'Book:create' %}">New book</a>
-          {% endif %}
-        </nav>
-        <div style="display: flex;flex-direction: row;flex-wrap: nowrap;align-content: center;justify-content: space-between;align-items: center;">
-          {% if user.is_authenticated %}
-            <span>Hi, {{ user.first_name }} {{ user.last_name }}</span>
-            <span style="width: 16px;"></span>
-
-            {% has_social_connections as has_connections %}
-            {% if not has_connections %}
-              <a href="{% url 'socialaccount_connections' %}">Connect Google</a>
-            {% endif %}
-            <form method="post" action="/accounts/logout/" class="logout-form">
-              {% csrf_token %}
-              <button class="btn btn-ghost" type="submit">Log out</button>
-            </form>
-          {% else %}
-            <a href="/accounts/login/">Log in</a>
-            <span style="width: 16px;"></span>
-            <p>|</p>
-            <span style="width: 16px;"></span>
-            <a href="{% url 'User:signup' %}">Register</a>
+            <button class="icon-btn" type="button" aria-label="Notifications">
+              <span class="icon-bell"></span>
+            </button>
           {% endif %}
         </div>
       </header>
-    {% endif %}
+    {% endblock %}
 
-    <main class="page">
+    <main class="{% block main_class %}{% endblock %}">
+      {% block toolbar %}
+        <div class="body-toolbar">
+          <label class="category-select">
+            <span>Category</span>
+            <select name="category">
+              <option>All</option>
+              <option>Fiction</option>
+              <option>Non-fiction</option>
+              <option>Poetry</option>
+              <option>Essays</option>
+            </select>
+          </label>
+          <button class="library-btn" type="button">My Library</button>
+        </div>
+      {% endblock %}
       {% block content %}{% endblock %}
     </main>
-    <footer class="footer">
-      <div class="footer-inner">
-        <span>Note-Book · Your learning notebook</span>
-        <span class="meta">Built with care · 2026</span>
-      </div>
-    </footer>
+    <div class="profile-menu" data-profile-menu>
+      {% if user.is_authenticated %}
+        <div class="profile-header">
+          <span class="profile-avatar"></span>
+          <span class="profile-name">{{ user.first_name }} {{ user.last_name }}</span>
+        </div>
+        <a href="#">My profile</a>
+        <a href="{% url 'Book:my_list' %}">My Library</a>
+        <div class="profile-divider"></div>
+        <form method="post" action="/accounts/logout/?next={% url 'Book:public_list' %}">
+          {% csrf_token %}
+          <button type="submit">Log out</button>
+        </form>
+      {% else %}
+        <a href="/accounts/login/">Sign in</a>
+        <a href="{% url 'User:signup' %}">Sign up</a>
+      {% endif %}
+    </div>
+    <script>
+      (function () {
+        var toggle = document.querySelector("[data-profile-toggle]");
+        var menu = document.querySelector("[data-profile-menu]");
+        if (!toggle || !menu) return;
+
+        function closeMenu() {
+          menu.classList.remove("is-open");
+        }
+
+        toggle.addEventListener("click", function (event) {
+          event.stopPropagation();
+          menu.classList.toggle("is-open");
+        });
+
+        document.addEventListener("click", function (event) {
+          if (!menu.contains(event.target)) {
+            closeMenu();
+          }
+        });
+      })();
+    </script>
+    {% block footer %}
+      <footer class="footer">
+        <div class="footer-inner">
+          <span>Note-Book · Living stories in public</span>
+          <div class="footer-links">
+            <a href="#">Privacy</a>
+            <a href="#">Terms</a>
+            <a href="#">Contact</a>
+          </div>
+        </div>
+      </footer>
+    {% endblock %}
   </body>
 </html>

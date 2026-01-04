@@ -16,12 +16,17 @@ class BookForm(forms.ModelForm):
 
 
 class LeafForm(forms.ModelForm):
+    content_json = forms.JSONField(required=False, widget=forms.HiddenInput)
+
     class Meta:
         model = Leaf
-        fields = ("text",)
-        widgets = {
-            "text": forms.Textarea(attrs={"rows": 4, "maxlength": 500}),
-        }
+        fields = ("content_json",)
+
+    def clean_content_json(self):
+        data = self.cleaned_data.get("content_json")
+        if not data:
+            return {"type": "doc", "content": [{"type": "paragraph"}]}
+        return data
 
 
 class LeafImageUploadForm(forms.Form):

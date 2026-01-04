@@ -1,119 +1,41 @@
 {% extends "Book/base.html" %}
+{% load static %}
 
-{% block title %}Add leaf · Note-Book{% endblock %}
+{% block title %}New leaf · Note-Book{% endblock %}
+
+{% block toolbar %}{% endblock %}
 
 {% block content %}
-  {% if book_missing %}
-    <section class="empty-state">
-      <h1>Book not found</h1>
-      <p>No book exists with ID {{ requested_id }}.</p>
-      <a class="btn btn-primary" href="{% url 'Book:public_list' %}">Go to home</a>
-    </section>
-  {% else %}
-    <section class="form-shell">
-      <div class="form-card">
-        <h1>Add a new leaf</h1>
-        <p>Write a note or add a photo for this book.</p>
-        <form method="post" enctype="multipart/form-data" class="form-grid" data-counter-form>
-          {% csrf_token %}
-          {{ form.non_field_errors }}
-          <div class="form-group">
-            <label for="{{ form.text.id_for_label }}">Text</label>
-            {{ form.text }}
-            <div class="meta counter" data-counter-for="{{ form.text.id_for_label }}"></div>
-          </div>
-          <div class="form-group">
-            <label for="{{ image_form.images.id_for_label }}">Photos</label>
-            {{ image_form.images }}
-            <span class="meta">You can select multiple photos.</span>
-            <div class="image-preview" data-preview-list></div>
-          </div>
-          <div class="form-actions">
-            <button class="btn btn-primary" type="submit">Add leaf</button>
-            <a class="btn btn-ghost" href="{% url 'Book:detail' book.pk %}">Cancel</a>
-          </div>
-        </form>
+  <section class="editor-shell">
+    <header class="editor-header">
+      <a class="reader-back" href="{% url 'Book:detail' book.pk %}" aria-label="Back">←</a>
+      <h1>Create a new leaf</h1>
+      <p>Write freely and drop images into the page.</p>
+    </header>
+    <form method="post" class="editor-form" data-editor-form data-upload-url="{% url 'Book:leaf_image_upload' %}">
+      {% csrf_token %}
+      {{ form.content_json }}
+      <div class="editor-toolbar">
+        <button class="editor-icon-btn" type="button" data-image-button>Insert image</button>
+        <input type="file" accept="image/*" data-image-input hidden />
+        <div class="editor-divider" aria-hidden="true"></div>
+        <button class="editor-icon-btn" type="button" data-heading="1">Title</button>
+        <button class="editor-icon-btn" type="button" data-heading="2">Subtitle</button>
+        <button class="editor-icon-btn" type="button" data-heading="paragraph">Normal</button>
+        <label class="editor-color">
+          <span>Color</span>
+          <input type="color" value="#1f2a37" data-color-input />
+        </label>
       </div>
-    </section>
-
-    <script>
-      (function () {
-        function updateCounter(input, counter) {
-          if (!input || !counter) return;
-          var max = input.getAttribute("maxlength");
-          if (!max) return;
-          var length = (input.value || "").length;
-          counter.textContent = length + " / " + max;
-        }
-
-        document.querySelectorAll("[data-counter-form]").forEach(function (form) {
-          form.querySelectorAll(".counter").forEach(function (counter) {
-            var id = counter.getAttribute("data-counter-for");
-            var input = form.querySelector("#" + id);
-            if (!input) return;
-            updateCounter(input, counter);
-            input.addEventListener("input", function () {
-              updateCounter(input, counter);
-            });
-          });
-        });
-      })();
-    </script>
-    <script>
-      (function () {
-        var input = document.getElementById("{{ image_form.images.id_for_label }}");
-        var list = document.querySelector("[data-preview-list]");
-        if (!input || !list) return;
-
-        var dt = new DataTransfer();
-
-        function render() {
-          list.innerHTML = "";
-          Array.from(dt.files).forEach(function (file, index) {
-            var url = URL.createObjectURL(file);
-            var item = document.createElement("div");
-            item.className = "image-preview-item";
-
-            var img = document.createElement("img");
-            img.src = url;
-            img.alt = "Selected photo";
-
-            var btn = document.createElement("button");
-            btn.type = "button";
-            btn.className = "btn btn-ghost";
-            btn.textContent = "Remove";
-            btn.addEventListener("click", function () {
-              dt.items.remove(index);
-              input.files = dt.files;
-              render();
-            });
-
-            item.appendChild(img);
-            item.appendChild(btn);
-            list.appendChild(item);
-          });
-        }
-
-        function hasFile(file) {
-          return Array.from(dt.files).some(function (existing) {
-            return (
-              existing.name === file.name &&
-              existing.size === file.size &&
-              existing.lastModified === file.lastModified
-            );
-          });
-        }
-
-        input.addEventListener("change", function () {
-          Array.from(input.files).forEach(function (file) {
-            if (!hasFile(file)) {
-              dt.items.add(file);
-            }
-          });
-          input.files = dt.files;
-          render();
-        });
-      })();
-    </script>
-  {% endif %}
+      <div class="editor-canvas" data-editor-canvas>
+        <div class="editor-surface" data-editor-surface></div>
+        <button class="editor-image-remove" type="button" aria-label="Remove image" data-image-remove>×</button>
+      </div>
+      <div class="editor-actions">
+        <button class="editor-btn" type="submit">Save leaf</button>
+        <a class="editor-link" href="#">Cancel</a>
+      </div>
+    </form>
+  </section>
+  <script type="module" src="{% static 'Book/leaf_editor.js' %}"></script>
 {% endblock %}

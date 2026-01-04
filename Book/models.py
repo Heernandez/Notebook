@@ -25,6 +25,7 @@ class Book(models.Model):
 class Leaf(models.Model):
     book = models.ForeignKey(Book, on_delete=models.CASCADE, related_name="leaves")
     text = models.CharField(max_length=500, blank=True)
+    content_json = models.JSONField(default=dict, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
