@@ -32,15 +32,21 @@
       <span class="detail-rating-bottom">{{ review_count }} review{% if review_count != 1 %}s{% endif %}</span>
     </div>
     <span class="detail-sep" aria-hidden="true">|</span>
-    <button class="save-btn" type="button" aria-label="Save book">
-      <img
-        src="{% static 'Book/unsaved.png' %}"
-        alt=""
-        aria-hidden="true"
-        data-unsaved-src="{% static 'Book/unsaved.png' %}"
-        data-saved-src="{% static 'Book/saved.png' %}"
-      />
-    </button>
+    <form method="post" action="{% url 'Book:toggle_saved' book.pk %}">
+      {% csrf_token %}
+      <button
+        class="save-btn"
+        type="submit"
+        aria-label="Save book"
+        aria-pressed="{% if is_saved %}true{% else %}false{% endif %}"
+      >
+        <img
+          src="{% if is_saved %}{% static 'Book/saved.png' %}{% else %}{% static 'Book/unsaved.png' %}{% endif %}"
+          alt=""
+          aria-hidden="true"
+        />
+      </button>
+    </form>
     <span class="detail-sep" aria-hidden="true">|</span>
     <a class="save-btn detail-read" href="{% url 'Book:reader' book.pk %}" aria-label="Read">
       <img src="{% static 'Book/read.png' %}" alt="" aria-hidden="true" />
@@ -51,8 +57,12 @@
       <span class="detail-pages-label">page{% if leaves|length != 1 %}s{% endif %}</span>
     </span>
     {% if user == book.owner %}
-      <a class="save-btn detail-edit" href="{% url 'Book:edit' book.pk %}">Edit</a>
-      <a class="save-btn detail-add" href="{% url 'Book:add_leaf' book.pk %}">Add leaf</a>
+      <a class="save-btn detail-edit" href="{% url 'Book:edit' book.pk %}" aria-label="Edit">
+        <img src="{% static 'Book/edit.svg' %}" alt="" aria-hidden="true" />
+      </a>
+      <a class="save-btn detail-add" href="{% url 'Book:add_leaf' book.pk %}" aria-label="Add leaf">
+        <img src="{% static 'Book/add.png' %}" alt="" aria-hidden="true" />
+      </a>
     {% endif %}
   </div>
   <section class="detail-about">
@@ -124,16 +134,6 @@
   </section>
   <script>
     (function () {
-      var btn = document.querySelector(".save-btn");
-      if (!btn) return;
-      var img = btn.querySelector("img");
-      if (!img) return;
-      var saved = false;
-      btn.addEventListener("click", function () {
-        saved = !saved;
-        img.src = saved ? img.dataset.savedSrc : img.dataset.unsavedSrc;
-      });
-
       var form = document.querySelector("[data-review-form]");
       if (!form) return;
       var commentInput = form.querySelector("#review-comment");

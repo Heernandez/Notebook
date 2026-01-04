@@ -12,7 +12,7 @@ class BookForm(forms.ModelForm):
 
     class Meta:
         model = Book
-        fields = ("title", "description", "cover_image", "is_public")
+        fields = ("title", "category", "description", "cover_image", "is_public")
         widgets = {
             "title": forms.TextInput(attrs={"maxlength": 50}),
             "description": forms.Textarea(attrs={"maxlength": 200}),
@@ -22,6 +22,8 @@ class BookForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.fields["title"].required = True
         self.fields["description"].required = True
+        self.fields["category"].required = True
+        self.fields["category"].empty_label = "Select a category"
 
 
 class LeafForm(forms.ModelForm):

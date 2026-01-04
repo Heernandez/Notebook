@@ -12,7 +12,7 @@ from django.views.generic import CreateView, DetailView, ListView, UpdateView
 from django.core.files.storage import default_storage
 
 from .forms import BookForm, LeafForm, LeafImageUploadForm
-from .models import Book, Leaf, LeafImage
+from .models import Book, Leaf, LeafImage, SavedBook
 from reviews.models import Review
 
 
@@ -23,9 +23,12 @@ class PublicBookListView(ListView):
 
     def get_queryset(self):
         query = self.request.GET.get("q", "").strip()
+        category_id = self.request.GET.get("category", "").strip()
         qs = Book.objects.filter(is_public=True).annotate(
             avg_rating=Avg("reviews__rating")
         )
+        if category_id:
+            qs = qs.filter(category_id=category_id)
         if query:
             qs = qs.filter(
                 Q(title__icontains=query)
@@ -40,9 +43,29 @@ class MyBookListView(LoginRequiredMixin, ListView):
     context_object_name = "books"
 
     def get_queryset(self):
-        return Book.objects.filter(owner=self.request.user).annotate(
+        qs = Book.objects.filter(owner=self.request.user)
+        query = self.request.GET.get("q", "").strip()
+        category_id = self.request.GET.get("category", "").strip()
+        if category_id:
+            qs = qs.filter(category_id=category_id)
+        if query:
+            qs = qs.filter(
+                Q(title__icontains=query)
+                | Q(description__icontains=query)
+            )
+        return qs.annotate(
             avg_rating=Avg("reviews__rating")
         )
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["saved_books"] = (
+            Book.objects.filter(saved_by__user=self.request.user)
+            .exclude(owner=self.request.user)
+            .annotate(avg_rating=Avg("reviews__rating"))
+            .distinct()
+        )
+        return context
 
 
 class BookDetailView(DetailView):
@@ -85,6 +108,12 @@ class BookDetailView(DetailView):
         rating_data = rating_qs.aggregate(avg_rating=Avg("rating"))
         context["avg_rating"] = rating_data["avg_rating"]
         context["review_count"] = rating_qs.count()
+        if self.request.user.is_authenticated:
+            context["is_saved"] = SavedBook.objects.filter(
+                user=self.request.user, book=self.object
+            ).exists()
+        else:
+            context["is_saved"] = False
         return context
 
     def post(self, request, *args, **kwargs):
@@ -240,6 +269,27 @@ class LeafImageDeleteView(LoginRequiredMixin, DetailView):
         leaf_id = image.leaf_id
         image.delete()
         return redirect("Book:edit_leaf", pk=leaf_id)
+
+
+@login_required
+@require_POST
+def toggle_saved_book(request, pk):
+    book = Book.objects.filter(pk=pk).filter(
+        Q(is_public=True) | Q(owner=request.user)
+    ).first()
+    if not book:
+        raise Http404
+    saved_entry, created = SavedBook.objects.get_or_create(
+        user=request.user, book=book
+    )
+    if created:
+        is_saved = True
+    else:
+        saved_entry.delete()
+        is_saved = False
+    if request.headers.get("x-requested-with") == "XMLHttpRequest":
+        return JsonResponse({"saved": is_saved})
+    return redirect("Book:detail", pk=book.pk)
 
 
 @login_required

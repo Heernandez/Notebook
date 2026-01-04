@@ -8,6 +8,11 @@ class Book(models.Model):
         on_delete=models.CASCADE,
         related_name="books",
     )
+    category = models.ForeignKey(
+        "categories.Category",
+        on_delete=models.PROTECT,
+        related_name="books",
+    )
     title = models.CharField(max_length=50)
     description = models.CharField(max_length=200, blank=True)
     cover_image = models.ImageField(upload_to="books/covers/", blank=True, null=True)
@@ -20,6 +25,28 @@ class Book(models.Model):
 
     def __str__(self) -> str:
         return self.title
+
+
+class SavedBook(models.Model):
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="saved_books",
+    )
+    book = models.ForeignKey(
+        Book,
+        on_delete=models.CASCADE,
+        related_name="saved_by",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["user", "book"], name="unique_saved_book")
+        ]
+
+    def __str__(self) -> str:
+        return f"{self.user_id} saved {self.book_id}"
 
 
 class Leaf(models.Model):

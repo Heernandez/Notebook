@@ -5,8 +5,8 @@ from .models import Book, Leaf, LeafImage
 
 @admin.register(Book)
 class BookAdmin(admin.ModelAdmin):
-    list_display = ("title", "owner", "is_public", "updated_at")
-    list_filter = ("is_public", "updated_at")
+    list_display = ("title", "owner", "category", "is_public", "updated_at")
+    list_filter = ("category", "is_public", "updated_at")
     search_fields = ("title", "description", "content", "owner__username")
 
 
