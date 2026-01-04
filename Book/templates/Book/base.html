@@ -51,7 +51,12 @@
               <option>Essays</option>
             </select>
           </label>
-          <button class="library-btn" type="button">My Library</button>
+          {% if request.resolver_match and request.resolver_match.url_name == "my_list" %}
+            <a class="library-btn" href="{% url 'Book:public_list' %}">Library</a>
+          {% else %}
+            <a class="library-btn" href="{% url 'Book:my_list' %}">My Library</a>
+          {% endif %}
+          <a class="library-btn" href="{% url 'Book:create' %}">New Book</a>
         </div>
       {% endblock %}
       {% block content %}{% endblock %}
@@ -64,12 +69,14 @@
         </div>
         <a href="#">My profile</a>
         <a href="{% url 'Book:my_list' %}">My Library</a>
+        <a href="{% url 'Book:create' %}">New Book</a>
         <div class="profile-divider"></div>
         <form method="post" action="/accounts/logout/?next={% url 'Book:public_list' %}">
           {% csrf_token %}
           <button type="submit">Log out</button>
         </form>
       {% else %}
+        <a href="{% url 'Book:create' %}">New Book</a>
         <a href="/accounts/login/">Sign in</a>
         <a href="{% url 'User:signup' %}">Sign up</a>
       {% endif %}

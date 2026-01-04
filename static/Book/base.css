@@ -312,6 +312,10 @@ main {
   color: #fff;
   font-weight: 700;
   cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .book-grid {
@@ -686,6 +690,10 @@ main {
   gap: 12px;
 }
 
+.form-back {
+  justify-self: start;
+}
+
 .form-card h1 {
   margin: 0;
   font-size: 1.4rem;
@@ -711,6 +719,39 @@ main {
   margin: 0 auto 6px;
 }
 
+.svgContainer {
+  width: 160px;
+  height: 160px;
+  margin: 0 auto 6px;
+  border-radius: 999px;
+  border: 2px solid var(--line);
+  background: rgba(60, 110, 168, 0.08);
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.svgContainer > div {
+  position: relative;
+  width: 100%;
+  height: 0;
+  padding-bottom: 100%;
+}
+
+.svgContainer .mySVG {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.mouth-bg {
+  display: none;
+}
+
+.mouth-bg.is-active {
+  display: block;
+}
+
 .form-group label {
   display: block;
   font-weight: 700;
@@ -723,6 +764,96 @@ main {
   border: 1px solid var(--line);
   padding: 10px 12px;
   font-family: var(--font-ui);
+}
+
+.form-group textarea {
+  width: 100%;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  padding: 10px 12px;
+  font-family: var(--font-ui);
+  min-height: 120px;
+  resize: vertical;
+}
+
+.form-group input[type="file"] {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  border: 0;
+  clip: rect(0 0 0 0);
+  overflow: hidden;
+}
+
+.form-check {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.form-check input {
+  width: 18px;
+  height: 18px;
+}
+
+.form-group .errorlist,
+.form-check .errorlist {
+  margin: 6px 0 0;
+  padding: 0;
+  list-style: none;
+  color: #b00020;
+  font-size: 0.85rem;
+}
+
+.char-count {
+  display: block;
+  margin-top: 6px;
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+  text-align: right;
+}
+
+.char-count.is-over {
+  color: #b00020;
+}
+
+.cover-upload {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.cover-preview {
+  width: 155px;
+  aspect-ratio: 155 / 238;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: var(--card);
+  box-shadow: var(--shadow);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.cover-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.cover-preview .cover-placeholder {
+  color: var(--ink-soft);
+  font-weight: 700;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
 .form-actions {

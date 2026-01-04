@@ -46,7 +46,9 @@
       <span class="detail-pages-count">{{ leaves|length }}</span>
       <span class="detail-pages-label">page{% if leaves|length != 1 %}s{% endif %}</span>
     </span>
-    <a class="save-btn detail-add" href="{% url 'Book:add_leaf' book.pk %}">Add leaf</a>
+    {% if user == book.owner %}
+      <a class="save-btn detail-add" href="{% url 'Book:add_leaf' book.pk %}">Add leaf</a>
+    {% endif %}
   </div>
   <section class="detail-about">
     <h2>About this notebook</h2>

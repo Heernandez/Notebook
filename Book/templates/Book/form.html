@@ -1,0 +1,128 @@
+{% extends "Book/base.html" %}
+
+{% block title %}
+  {% if form.instance.pk %}
+    Edit book · Note-Book
+  {% else %}
+    New book · Note-Book
+  {% endif %}
+{% endblock %}
+
+{% block toolbar %}{% endblock %}
+
+{% block content %}
+  <section class="form-shell">
+    <div class="form-card">
+      <a class="reader-back form-back" href="{% url 'Book:my_list' %}" aria-label="Back">←</a>
+      {% if form.instance.pk %}
+        <h1>Edit book</h1>
+        <p>Update the details for this notebook.</p>
+      {% else %}
+        <h1>Create a new book</h1>
+        <p>Start a notebook and share it when you are ready.</p>
+      {% endif %}
+      <form method="post" enctype="multipart/form-data" class="form-grid">
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+        <div class="form-group">
+          <label for="{{ form.title.id_for_label }}">Title</label>
+          {{ form.title }}
+          <span class="char-count" data-char-count data-for="{{ form.title.id_for_label }}" data-max="50">0/50</span>
+          {{ form.title.errors }}
+        </div>
+        <div class="form-group">
+          <label for="{{ form.description.id_for_label }}">Description</label>
+          {{ form.description }}
+          <span class="char-count" data-char-count data-for="{{ form.description.id_for_label }}" data-max="200">0/200</span>
+          {{ form.description.errors }}
+        </div>
+        <div class="form-group">
+          <label for="{{ form.cover_image.id_for_label }}">Cover image</label>
+          {{ form.cover_image }}
+          {{ form.cover_image.errors }}
+        </div>
+        <div class="form-check">
+          {{ form.is_public }}
+          <label for="{{ form.is_public.id_for_label }}">Public</label>
+          {{ form.is_public.errors }}
+        </div>
+        <div class="form-actions">
+          {% if form.instance.pk %}
+            <button class="btn btn-primary" type="submit">Save changes</button>
+          {% else %}
+            <button class="btn btn-primary" type="submit">Create book</button>
+          {% endif %}
+          <a class="btn btn-ghost" href="{% url 'Book:my_list' %}">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </section>
+  <script>
+    (function () {
+      var upload = document.querySelector("[data-cover-upload]");
+      if (!upload) return;
+      var input = upload.querySelector('input[type="file"]');
+      var preview = upload.querySelector(".cover-preview");
+      if (!input || !preview) return;
+      var img = preview.querySelector("img");
+      var placeholder = preview.querySelector(".cover-placeholder");
+      var currentUrl = upload.dataset.coverUrl || "";
+
+      function setPreview(src) {
+        if (!img) {
+          img = document.createElement("img");
+          img.alt = "Cover preview";
+          preview.innerHTML = "";
+          preview.appendChild(img);
+        }
+        img.src = src;
+      }
+
+      if (currentUrl) {
+        setPreview(currentUrl);
+      }
+
+      input.addEventListener("change", function () {
+        var file = input.files && input.files[0];
+        if (!file) {
+          if (currentUrl) {
+            setPreview(currentUrl);
+          } else if (placeholder) {
+            preview.innerHTML = "";
+            preview.appendChild(placeholder);
+          }
+          return;
+        }
+        var objectUrl = URL.createObjectURL(file);
+        setPreview(objectUrl);
+        img.onload = function () {
+          URL.revokeObjectURL(objectUrl);
+        };
+      });
+    })();
+    (function () {
+      var counters = document.querySelectorAll("[data-char-count]");
+      if (!counters.length) return;
+
+      function update(counter) {
+        var targetId = counter.getAttribute("data-for");
+        var max = parseInt(counter.getAttribute("data-max"), 10) || 0;
+        var field = document.getElementById(targetId);
+        if (!field) return;
+        var length = field.value.length;
+        counter.textContent = length + "/" + max;
+        counter.classList.toggle("is-over", max > 0 && length > max);
+      }
+
+      counters.forEach(function (counter) {
+        var targetId = counter.getAttribute("data-for");
+        var field = document.getElementById(targetId);
+        if (!field) return;
+        update(counter);
+        field.addEventListener("input", function () {
+          update(counter);
+        });
+      });
+    })();
+  </script>
+{% endblock %}

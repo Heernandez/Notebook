@@ -1,0 +1,28 @@
+{% extends "Book/base.html" %}
+
+{% block title %}My Library · Note-Book{% endblock %}
+
+{% block content %}
+  <section class="book-grid">
+    {% for book in books %}
+      <article class="book-card">
+        <a class="book-card-link" href="{% url 'Book:detail' book.pk %}">
+          <div class="book-cover">
+            {% if book.cover_image %}
+              <img src="{{ book.cover_image.url }}" alt="Cover for {{ book.title }}" />
+            {% else %}
+              <div class="cover-placeholder">No cover</div>
+            {% endif %}
+          </div>
+          <h3 class="book-title">{{ book.title }}</h3>
+          <div class="book-rating">
+            <span class="rating-star" aria-hidden="true"></span>
+            <span class="rating-value">4.6</span>
+          </div>
+        </a>
+      </article>
+    {% empty %}
+      <p class="empty-state">No books yet.</p>
+    {% endfor %}
+  </section>
+{% endblock %}
