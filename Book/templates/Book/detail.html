@@ -51,6 +51,7 @@
       <span class="detail-pages-label">page{% if leaves|length != 1 %}s{% endif %}</span>
     </span>
     {% if user == book.owner %}
+      <a class="save-btn detail-edit" href="{% url 'Book:edit' book.pk %}">Edit</a>
       <a class="save-btn detail-add" href="{% url 'Book:add_leaf' book.pk %}">Add leaf</a>
     {% endif %}
   </div>
