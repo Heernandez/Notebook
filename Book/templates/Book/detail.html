@@ -32,6 +32,15 @@
       <span class="detail-rating-bottom">{{ review_count }} review{% if review_count != 1 %}s{% endif %}</span>
     </div>
     <span class="detail-sep" aria-hidden="true">|</span>
+    <span class="detail-pages">
+      <span class="detail-pages-count">{{ leaves|length }}</span>
+      <span class="detail-pages-label">page{% if leaves|length != 1 %}s{% endif %}</span>
+    </span>
+    <span class="detail-sep" aria-hidden="true">|</span>
+    <a class="save-btn detail-read" href="{% url 'Book:reader' book.pk %}" aria-label="Read">
+      <img src="{% static 'Book/read.png' %}" alt="" aria-hidden="true" />
+    </a>
+    <span class="detail-sep" aria-hidden="true">|</span>
     <form method="post" action="{% url 'Book:toggle_saved' book.pk %}">
       {% csrf_token %}
       <button
@@ -47,15 +56,6 @@
         />
       </button>
     </form>
-    <span class="detail-sep" aria-hidden="true">|</span>
-    <a class="save-btn detail-read" href="{% url 'Book:reader' book.pk %}" aria-label="Read">
-      <img src="{% static 'Book/read.png' %}" alt="" aria-hidden="true" />
-    </a>
-    <span class="detail-sep" aria-hidden="true">|</span>
-    <span class="detail-pages">
-      <span class="detail-pages-count">{{ leaves|length }}</span>
-      <span class="detail-pages-label">page{% if leaves|length != 1 %}s{% endif %}</span>
-    </span>
     {% if user == book.owner %}
       <a class="save-btn detail-edit" href="{% url 'Book:edit' book.pk %}" aria-label="Edit">
         <img src="{% static 'Book/edit.svg' %}" alt="" aria-hidden="true" />
