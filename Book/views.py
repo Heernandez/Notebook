@@ -1,9 +1,15 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Q
-from django.http import Http404
+import os
+import uuid
+
+from django.contrib.auth.decorators import login_required
+from django.http import Http404, JsonResponse
 from django.shortcuts import redirect, render
 from django.urls import reverse_lazy
+from django.views.decorators.http import require_POST
 from django.views.generic import CreateView, DetailView, ListView, UpdateView
+from django.core.files.storage import default_storage
 
 from .forms import BookForm, LeafForm, LeafImageUploadForm
 from .models import Book, Leaf, LeafImage
@@ -197,3 +203,15 @@ class LeafImageDeleteView(LoginRequiredMixin, DetailView):
         leaf_id = image.leaf_id
         image.delete()
         return redirect("Book:edit_leaf", pk=leaf_id)
+
+
+@login_required
+@require_POST
+def leaf_image_upload(request):
+    file = request.FILES.get("image")
+    if not file:
+        return JsonResponse({"error": "Missing image"}, status=400)
+    _, ext = os.path.splitext(file.name)
+    name = f"books/leaf_editor/{uuid.uuid4().hex}{ext.lower()}"
+    path = default_storage.save(name, file)
+    return JsonResponse({"url": default_storage.url(path)})

@@ -13,15 +13,29 @@ class BookForm(forms.ModelForm):
     class Meta:
         model = Book
         fields = ("title", "description", "cover_image", "is_public")
+        widgets = {
+            "title": forms.TextInput(attrs={"maxlength": 50}),
+            "description": forms.Textarea(attrs={"maxlength": 200}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["title"].required = True
+        self.fields["description"].required = True
 
 
 class LeafForm(forms.ModelForm):
+    content_json = forms.JSONField(required=False, widget=forms.HiddenInput)
+
     class Meta:
         model = Leaf
-        fields = ("text",)
-        widgets = {
-            "text": forms.Textarea(attrs={"rows": 4, "maxlength": 500}),
-        }
+        fields = ("content_json",)
+
+    def clean_content_json(self):
+        data = self.cleaned_data.get("content_json")
+        if not data:
+            return {"type": "doc", "content": [{"type": "paragraph"}]}
+        return data
 
 
 class LeafImageUploadForm(forms.Form):

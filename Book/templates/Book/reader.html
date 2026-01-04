@@ -1,74 +1,54 @@
 {% extends "Book/base.html" %}
+{% load static %}
 
-{% block body_class %}reader-body{% endblock %}
+{% block title %}{{ book.title }} · Reader{% endblock %}
 
-{% block title %}{{ book.title }} · Note-Book Reader{% endblock %}
+{% block header %}
+  <header class="topbar reader-topbar">
+    <div class="reader-bar">
+      <a class="reader-back" href="{% url 'Book:detail' book.pk %}" aria-label="Back">←</a>
+      <h1 class="reader-title">{{ book.title }}</h1>
+      {% if user == book.owner and leaves %}
+        <a class="reader-edit" href="{% url 'Book:edit_leaf' leaves.0.pk %}" data-edit-link>Edit</a>
+      {% endif %}
+    </div>
+  </header>
+{% endblock %}
+
+{% block toolbar %}{% endblock %}
+{% block main_class %}main-reader{% endblock %}
+{% block body_class %}body-reader{% endblock %}
 
 {% block content %}
-  {% if book_missing %}
-    <section class="empty-state">
-      <h1>Book not found</h1>
-      <p>No book exists with ID {{ requested_id }}.</p>
-      <a class="btn btn-primary" href="{% url 'Book:public_list' %}">Go to home</a>
-    </section>
-  {% else %}
-    <section class="reader-shell reader-full">
-      <header class="reader-header">
-        <div>
-          <h1>{{ book.title }}</h1>
-          <span class="meta">By {{ book.owner.first_name }} {{ book.owner.last_name }}</span>
-        </div>
-        <div class="reader-actions">
-          <span class="meta" data-reader-counter>1 / {{ leaves|length }}</span>
-          <a class="btn btn-ghost" href="{% url 'Book:detail' book.pk %}">Exit reader</a>
-        </div>
-      </header>
-
-      {% if leaves %}
-        <div class="reader-stage" data-reader>
-          <button class="reader-nav reader-prev" type="button">Prev</button>
-          <div class="reader-track">
-            {% for leaf in leaves %}
-              <article class="reader-page" data-leaf-id="{{ leaf.pk }}">
-                <div class="leaf-meta">
-                  <span class="chip chip-public">Leaf {{ forloop.counter }}</span>
-                  <span class="meta">{{ leaf.created_at|date:"M d, Y" }}</span>
-                </div>
-                {% if leaf.images.exists %}
-                  <div class="reader-gallery">
-                    {% for image in leaf.images.all %}
-                      <img src="{{ image.image.url }}" alt="Leaf image" />
-                    {% endfor %}
-                  </div>
-                {% endif %}
-                {% if leaf.text %}
-                  <div class="leaf-text">
-                    {{ leaf.text|linebreaks }}
-                  </div>
-                {% endif %}
-              </article>
-            {% endfor %}
-          </div>
-          <button class="reader-nav reader-next" type="button">Next</button>
-        </div>
-      {% else %}
-        <div class="empty-state">
-          <h3>No leaves yet</h3>
-          <p>Create a leaf to start your reader view.</p>
-        </div>
-      {% endif %}
-    </section>
-  {% endif %}
-
+  <section class="reader-shell reader-shell--full" data-reader>
+    {% if leaves %}
+      <div class="reader-track">
+        {% for leaf in leaves %}
+          <article class="reader-page" data-leaf-id="{{ leaf.pk }}">
+            <div class="reader-leaf" data-leaf-id="{{ leaf.pk }}" data-leaf-text="{{ leaf.text|default:""|escapejs }}"></div>
+            {% with script_id="leaf-json-"|add:leaf.pk %}
+              {{ leaf.content_json|json_script:script_id }}
+            {% endwith %}
+          </article>
+        {% endfor %}
+      </div>
+      <button class="reader-nav reader-prev" type="button" aria-label="Previous">Prev</button>
+      <button class="reader-nav reader-next" type="button" aria-label="Next">Next</button>
+    {% else %}
+      <p class="empty-state">No leaves yet.</p>
+    {% endif %}
+  </section>
+  <script type="module" src="{% static 'Book/leaf_reader.js' %}"></script>
   <script>
     (function () {
       var stage = document.querySelector("[data-reader]");
       if (!stage) return;
       var track = stage.querySelector(".reader-track");
+      if (!track) return;
       var pages = track.querySelectorAll(".reader-page");
       var prev = stage.querySelector(".reader-prev");
       var next = stage.querySelector(".reader-next");
-      var counter = document.querySelector("[data-reader-counter]");
+      var editLink = document.querySelector("[data-edit-link]");
       var index = 0;
       var startX = 0;
       var currentX = 0;
@@ -76,9 +56,17 @@
 
       function update() {
         track.style.transform = "translateX(" + (-index * 100) + "%)";
-        if (counter) {
-          counter.textContent = (index + 1) + " / " + pages.length;
-        }
+        updateEditLink();
+        resetFlip();
+      }
+
+      function updateEditLink() {
+        if (!editLink) return;
+        var page = pages[index];
+        if (!page) return;
+        var leafId = page.getAttribute("data-leaf-id");
+        if (!leafId) return;
+        editLink.href = "/leaves/" + leafId + "/edit/?leaf=" + leafId;
       }
 
       function clampIndex() {
@@ -92,26 +80,12 @@
         update();
       }
 
-      var params = new URLSearchParams(window.location.search);
-      var leafId = params.get("leaf");
-      console.log("[reader] requested leaf id:", leafId);
-      if (leafId) {
-        Array.from(pages).some(function (page, idx) {
-          if (page.getAttribute("data-leaf-id") === leafId) {
-            console.log("[reader] matched leaf id at index:", idx);
-            index = idx;
-            console.log("[reader] final index:", index);
-            return true;
-          }
-          return false;
-        });
-      }
-
       function onStart(clientX) {
         dragging = true;
         startX = clientX;
         currentX = clientX;
         track.classList.add("is-dragging");
+        setTilting(true);
       }
 
       function onMove(clientX) {
@@ -120,6 +94,7 @@
         var delta = currentX - startX;
         track.style.transform =
           "translateX(calc(" + (-index * 100) + "% + " + delta + "px))";
+        applyFlip(delta);
       }
 
       function onEnd() {
@@ -131,15 +106,36 @@
         clampIndex();
         dragging = false;
         track.classList.remove("is-dragging");
+        setTilting(false);
         update();
       }
 
-      prev.addEventListener("click", function () {
-        go(-1);
-      });
-      next.addEventListener("click", function () {
-        go(1);
-      });
+      function setTilting(active) {
+        var page = pages[index];
+        if (!page) return;
+        page.classList.toggle("is-tilting", active);
+      }
+
+      function resetFlip() {
+        Array.prototype.forEach.call(pages, function (page) {
+          page.style.transform = "";
+          page.style.transformOrigin = "";
+        });
+      }
+
+      function applyFlip(delta) {
+        var page = pages[index];
+        if (!page) return;
+        var width = stage.clientWidth || 1;
+        var progress = Math.max(-1, Math.min(1, delta / width));
+        var angle = progress * -20;
+        page.style.transformOrigin = progress < 0 ? "left center" : "right center";
+        page.style.transform = "rotateY(" + angle + "deg)";
+      }
+
+
+      if (prev) prev.addEventListener("click", function () { go(-1); });
+      if (next) next.addEventListener("click", function () { go(1); });
 
       stage.addEventListener("mousedown", function (event) {
         onStart(event.clientX);
@@ -165,6 +161,16 @@
         onEnd();
       });
 
+      var params = new URLSearchParams(window.location.search);
+      var leafParam = params.get("leaf");
+      if (leafParam) {
+        for (var i = 0; i < pages.length; i += 1) {
+          if (pages[i].getAttribute("data-leaf-id") === leafParam) {
+            index = i;
+            break;
+          }
+        }
+      }
       update();
     })();
   </script>

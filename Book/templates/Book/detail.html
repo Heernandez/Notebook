@@ -1,148 +1,62 @@
 {% extends "Book/base.html" %}
 {% load static %}
 
-{% block title %}{{ book.title }} · Note-Book{% endblock %}
+{% block title %}Book · Note-Book{% endblock %}
 
 {% block content %}
-  {% if book_missing %}
-    <section class="empty-state">
-      <h1>Book not found</h1>
-      <p>No book exists with ID {{ requested_id }}.</p>
-      <a class="btn btn-primary" href="{% url 'Book:public_list' %}">Go to home</a>
-    </section>
-  {% else %}
-    <section class="detail-hero">
-      <div class="detail-info-stack">
-        <div class="detail-title">
-          <h1>{{ book.title }}</h1>
-          <div class="detail-status">
-            <span class="chip {% if book.is_public %}chip-public{% else %}chip-private{% endif %}">
-              {% if book.is_public %}Public{% else %}Private{% endif %}
-            </span>
-          </div>
-        </div>
-        <div class="detail-actions-column">
-          <div class="detail-cover">
-            {% if book.cover_image %}
-              <img src="{{ book.cover_image.url }}" alt="Cover for {{ book.title }}" />
-            {% else %}
-              <div class="cover-placeholder cover-placeholder--large">No cover</div>
-            {% endif %}
-          </div>
-        </div>
-        <div class="detail-actions-column">
-          <p class="detail-summary">{{ book.description|default:"No description yet" }}</p>
-        </div>
-        <div class="detail-actions-column">
-          <p class="meta">By {{ book.owner.first_name }} {{ book.owner.last_name }} · Updated {{ book.updated_at|date:"M d, Y" }}</p>  
-        </div>
-        <div class="detail-actions-column">
-          <a class="btn btn-ghost" href="{% url 'Book:reader' book.pk %}">Read</a>
-          <button class="btn btn-ghost icon-btn" type="button" aria-label="Save favorite" data-favorite-toggle>
-            <img
-              src="{% static 'Book/unsaved.png' %}"
-              data-unsaved-src="{% static 'Book/unsaved.png' %}"
-              data-saved-src="{% static 'Book/saved.png' %}"
-              alt=""
-              aria-hidden="true"
-            />
-           <!----Save -->
-          </button>
-          <div class="rating-widget" aria-label="Rate this book">
-            <div class="rating-stars" data-rating-stars>
-              <span class="rating-base">★★★★★</span>
-              <span class="rating-fill" data-rating-fill>★★★★★</span>
-            </div>
-            <input
-              class="rating-input"
-              type="range"
-              min="0"
-              max="5"
-              step="0.5"
-              value="0"
-              aria-label="Rating from 0 to 5"
-              data-rating-input
-            />
-            <span class="meta rating-value" data-rating-value>0</span>
-          </div>
-        </div>
-        {% if user == book.owner %}
-          <div class="detail-actions">
-            <a class="btn btn-primary" href="{% url 'Book:edit' book.pk %}">Edit book</a>
-            <a class="btn btn-ghost" href="{% url 'Book:add_leaf' book.pk %}">Add leaf</a>
-          </div>
-        {% endif %}
-      </div>
-    </section>
-
-    <section class="content-block book-scroll">
-      <div class="book-header">
-        <div>
-          <h2>Leaves</h2>
-          <span class="meta">{{ leaves|length }} page{% if leaves|length != 1 %}s{% endif %}</span>
-        </div>
-        <form method="get" class="order-form">
-          <label for="leaf-order" class="meta">Order</label>
-          <select id="leaf-order" name="order" onchange="this.form.submit()">
-            <option value="newest" {% if leaf_order != "oldest" %}selected{% endif %}>Newest</option>
-            <option value="oldest" {% if leaf_order == "oldest" %}selected{% endif %}>Oldest</option>
-          </select>
-        </form>
-      </div>
-      {% if leaves %}
-        <div class="leaf-scroll">
-          {% for leaf in leaves %}
-            <article class="leaf-page">
-              <div class="leaf-meta">
-                <a class="leaf-link" href="{% url 'Book:reader' book.pk %}?leaf={{ leaf.pk }}">
-                  {% if leaf_order == "oldest" %}
-                    <span class="chip chip-public">Leaf {{ forloop.counter }}</span>
-                  {% else %}
-                    <span class="chip chip-public">Leaf {{ forloop.revcounter }}</span>
-                  {% endif %}
-                  <span class="meta">Added {{ leaf.created_at|date:"M d, Y" }}</span>
-                </a>
-              </div>
-              {# no leaf content shown here #}
-              {% if user == book.owner %}
-                <div class="card-actions">
-                  <a class="btn btn-ghost" href="{% url 'Book:edit_leaf' leaf.pk %}">Edit leaf</a>
-                </div>
-              {% endif %}
-            </article>
-          {% endfor %}
-        </div>
+  <a class="reader-back" href="{% url 'Book:public_list' %}" aria-label="Back">←</a>
+  <section class="detail-layout">
+    <div class="detail-cover">
+      {% if book.cover_image %}
+        <img src="{{ book.cover_image.url }}" alt="Cover for {{ book.title }}" />
       {% else %}
-        <p class="meta">No leaves yet.</p>
+        <div class="cover-placeholder">No cover</div>
       {% endif %}
-    </section>
-  {% endif %}
-
+    </div>
+    <div class="detail-info">
+      <h1 class="detail-title">{{ book.title }}</h1>
+      <h3 class="detail-author">{{ book.owner.first_name }} {{ book.owner.last_name }}</h3>
+      <span class="detail-date">{{ book.created_at|date:"M Y" }}</span>
+    </div>
+  </section>
+  <div class="detail-actions-row">
+    <div class="detail-rating">
+      <span class="detail-rating-top">
+        <span class="rating-star" aria-hidden="true"></span>
+        <span class="rating-value">4.6</span>
+      </span>
+      <span class="detail-rating-bottom">120 reviews</span>
+    </div>
+    <span class="detail-sep" aria-hidden="true">|</span>
+    <button class="save-btn" type="button" aria-label="Save book">
+      <img
+        src="{% static 'Book/unsaved.png' %}"
+        alt=""
+        aria-hidden="true"
+        data-unsaved-src="{% static 'Book/unsaved.png' %}"
+        data-saved-src="{% static 'Book/saved.png' %}"
+      />
+    </button>
+    <span class="detail-sep" aria-hidden="true">|</span>
+    <a class="save-btn detail-read" href="{% url 'Book:reader' book.pk %}" aria-label="Read">
+      <img src="{% static 'Book/read.png' %}" alt="" aria-hidden="true" />
+    </a>
+    <span class="detail-sep" aria-hidden="true">|</span>
+    <span class="detail-pages">
+      <span class="detail-pages-count">{{ leaves|length }}</span>
+      <span class="detail-pages-label">page{% if leaves|length != 1 %}s{% endif %}</span>
+    </span>
+    {% if user == book.owner %}
+      <a class="save-btn detail-add" href="{% url 'Book:add_leaf' book.pk %}">Add leaf</a>
+    {% endif %}
+  </div>
+  <section class="detail-about">
+    <h2>About this notebook</h2>
+    <p>{{ book.description|default:"No description yet" }}</p>
+  </section>
   <script>
     (function () {
-      document.querySelectorAll("[data-leaf-slider]").forEach(function (slider) {
-        var track = slider.querySelector(".leaf-slider-track");
-        var slides = track ? track.querySelectorAll("img") : [];
-        if (!track || slides.length < 2) return;
-        var index = 0;
-        function update() {
-          track.style.transform = "translateX(" + (-index * 100) + "%)";
-        }
-        slider.querySelector(".slider-prev").addEventListener("click", function () {
-          index = (index - 1 + slides.length) % slides.length;
-          update();
-        });
-        slider.querySelector(".slider-next").addEventListener("click", function () {
-          index = (index + 1) % slides.length;
-          update();
-        });
-        update();
-      });
-    })();
-  </script>
-  <script>
-    (function () {
-      var btn = document.querySelector("[data-favorite-toggle]");
+      var btn = document.querySelector(".save-btn");
       if (!btn) return;
       var img = btn.querySelector("img");
       if (!img) return;
@@ -153,42 +67,5 @@
       });
     })();
   </script>
-  <script>
-    (function () {
-      var input = document.querySelector("[data-rating-input]");
-      var fill = document.querySelector("[data-rating-fill]");
-      var stars = document.querySelector("[data-rating-stars]");
-      var value = document.querySelector("[data-rating-value]");
-      if (!input || !fill || !stars) return;
-
-      function update() {
-        var current = parseFloat(input.value || "0");
-        fill.style.width = (current / 5) * 100 + "%";
-        if (value) value.textContent = current.toFixed(1);
-      }
-
-      function setFromEvent(event) {
-        var rect = stars.getBoundingClientRect();
-        var x = Math.max(0, Math.min(event.clientX - rect.left, rect.width));
-        var percent = x / rect.width;
-        var raw = percent * 5;
-        var stepped = Math.round(raw * 2) / 2;
-        input.value = stepped.toFixed(1);
-        update();
-      }
-
-      stars.addEventListener("click", function (event) {
-        setFromEvent(event);
-      });
-
-      stars.addEventListener("mousemove", function (event) {
-        if (event.buttons === 1) {
-          setFromEvent(event);
-        }
-      });
-
-      input.addEventListener("input", update);
-      update();
-    })();
-  </script>
 {% endblock %}
+{% block toolbar %}{% endblock %}

@@ -132,6 +132,7 @@ def signup(request):
         request.session["pending_user_id"] = user.id
         return redirect("User:verify_otp")
 
+    list(messages.get_messages(request))
     return render(
         request,
         "User/signup.html",

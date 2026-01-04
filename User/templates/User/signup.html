@@ -2,10 +2,12 @@
 {% load socialaccount %}
 
 {% block title %}Create account · Note-Book{% endblock %}
+{% block toolbar %}{% endblock %}
 
 {% block content %}
   <section class="form-shell">
     <div class="form-card">
+      <a class="reader-back form-back" href="{% url 'Book:public_list' %}" aria-label="Back">←</a>
       <h1>Create your account</h1>
       <p>Use your email as your username.</p>
       {% if messages %}

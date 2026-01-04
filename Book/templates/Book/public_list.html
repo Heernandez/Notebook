@@ -1,47 +1,28 @@
 {% extends "Book/base.html" %}
 
-{% block title %}Explore notebooks · Note-Book{% endblock %}
+{% block title %}Home · Note-Book{% endblock %}
 
 {% block content %}
-  <section class="hero">
-    <div>
-      <h1>Explore public notebooks</h1>
-      <p>Ideas, notes, and photos organized by people like you.</p>
-    </div>
-    <form class="search" method="get">
-      <input type="text" name="q" placeholder="Search by topic or keyword" value="{{ request.GET.q }}" />
-      <button class="btn btn-secondary" type="submit">Search</button>
-    </form>
+  <section class="book-grid">
+    {% for book in books %}
+      <article class="book-card">
+        <a class="book-card-link" href="{% url 'Book:detail' book.pk %}">
+          <div class="book-cover">
+            {% if book.cover_image %}
+              <img src="{{ book.cover_image.url }}" alt="Cover for {{ book.title }}" />
+            {% else %}
+              <div class="cover-placeholder">No cover</div>
+            {% endif %}
+          </div>
+          <h3 class="book-title">{{ book.title }}</h3>
+          <div class="book-rating">
+            <span class="rating-star" aria-hidden="true"></span>
+            <span class="rating-value">4.6</span>
+          </div>
+        </a>
+      </article>
+    {% empty %}
+      <p class="empty-state">No books yet.</p>
+    {% endfor %}
   </section>
-
-  {% if books %}
-    <section class="grid">
-      {% for book in books %}
-        <article class="card">
-          <a href="{% url 'Book:detail' book.pk %}">
-            <div class="card-cover">
-              {% if book.cover_image %}
-                <img src="{{ book.cover_image.url }}" alt="Cover for {{ book.title }}" />
-              {% else %}
-                <div class="cover-placeholder">No cover</div>
-              {% endif %}
-            </div>
-            <div class="card-body">
-              <h3>{{ book.title }}</h3>
-              <p>{{ book.description|default:"No description yet"|truncatechars:120 }}</p>
-              <span class="meta">By {{ book.owner.first_name }} {{ book.owner.last_name }}</span>
-            </div>
-          </a>
-        </article>
-      {% endfor %}
-    </section>
-  {% else %}
-    <div class="empty-state">
-      <h3>No public notebooks yet</h3>
-      <p>Be the first to share a notebook.</p>
-      {% if user.is_authenticated %}
-        <a class="btn btn-primary" href="{% url 'Book:create' %}">Create my notebook</a>
-      {% endif %}
-    </div>
-  {% endif %}
 {% endblock %}

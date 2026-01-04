@@ -1,8 +1,21 @@
-<input
-  type="file"
-  name="{{ widget.name }}"
-  {% if widget.value %}data-has-file="true"{% endif %}
-  {% if widget.attrs.id %}id="{{ widget.attrs.id }}"{% endif %}
-  {% if widget.attrs.class %}class="{{ widget.attrs.class }}"{% endif %}
-  {% if widget.attrs.accept %}accept="{{ widget.attrs.accept }}"{% endif %}
-/>
+<div
+  class="cover-upload"
+  data-cover-upload
+  {% if widget.value %}data-cover-url="{{ widget.value.url }}"{% endif %}
+>
+  <input
+    type="file"
+    name="{{ widget.name }}"
+    {% if widget.value %}data-has-file="true"{% endif %}
+    {% if widget.attrs.id %}id="{{ widget.attrs.id }}"{% endif %}
+    {% if widget.attrs.class %}class="{{ widget.attrs.class }}"{% endif %}
+    {% if widget.attrs.accept %}accept="{{ widget.attrs.accept }}"{% endif %}
+  />
+  <label class="cover-preview" {% if widget.attrs.id %}for="{{ widget.attrs.id }}"{% endif %}>
+    {% if widget.value %}
+      <img src="{{ widget.value.url }}" alt="Cover preview" />
+    {% else %}
+      <span class="cover-placeholder">Sin imagen</span>
+    {% endif %}
+  </label>
+</div>

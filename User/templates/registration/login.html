@@ -2,15 +2,18 @@
 {% load socialaccount %}
 
 {% block title %}Log in · Note-Book{% endblock %}
+{% block toolbar %}{% endblock %}
 
 {% block content %}
   <section class="form-shell">
     <div class="form-card">
+      <a class="reader-back form-back" href="{% url 'Book:public_list' %}" aria-label="Back">←</a>
       <h1>Welcome back</h1>
       <p>Log in to manage your books.</p>
       <form method="post" class="form-grid">
         {% csrf_token %}
         {{ form.non_field_errors }}
+        <div class="login-avatar" aria-hidden="true"></div>
         <div class="form-group">
           <label for="{{ form.username.id_for_label }}">Username</label>
           {{ form.username }}
