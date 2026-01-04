@@ -17,7 +17,13 @@
           <h3 class="book-title">{{ book.title }}</h3>
           <div class="book-rating">
             <span class="rating-star" aria-hidden="true"></span>
-            <span class="rating-value">4.6</span>
+            <span class="rating-value">
+              {% if book.avg_rating %}
+                {{ book.avg_rating|floatformat:1 }}
+              {% else %}
+                5
+              {% endif %}
+            </span>
           </div>
         </a>
       </article>

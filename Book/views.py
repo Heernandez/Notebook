@@ -1,5 +1,5 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.db.models import Q
+from django.db.models import Avg, Q
 import os
 import uuid
 
@@ -13,6 +13,7 @@ from django.core.files.storage import default_storage
 
 from .forms import BookForm, LeafForm, LeafImageUploadForm
 from .models import Book, Leaf, LeafImage
+from reviews.models import Review
 
 
 class PublicBookListView(ListView):
@@ -22,7 +23,9 @@ class PublicBookListView(ListView):
 
     def get_queryset(self):
         query = self.request.GET.get("q", "").strip()
-        qs = Book.objects.filter(is_public=True)
+        qs = Book.objects.filter(is_public=True).annotate(
+            avg_rating=Avg("reviews__rating")
+        )
         if query:
             qs = qs.filter(
                 Q(title__icontains=query)
@@ -37,7 +40,9 @@ class MyBookListView(LoginRequiredMixin, ListView):
     context_object_name = "books"
 
     def get_queryset(self):
-        return Book.objects.filter(owner=self.request.user)
+        return Book.objects.filter(owner=self.request.user).annotate(
+            avg_rating=Avg("reviews__rating")
+        )
 
 
 class BookDetailView(DetailView):
@@ -71,7 +76,39 @@ class BookDetailView(DetailView):
         ordering = "created_at" if order == "oldest" else "-created_at"
         context["leaves"] = Leaf.objects.filter(book=self.object).order_by(ordering)
         context["leaf_order"] = order
+        context["reviews"] = (
+            Review.objects.filter(book=self.object)
+            .select_related("user")
+            .order_by("-rating", "-created_at")[:3]
+        )
+        rating_qs = Review.objects.filter(book=self.object)
+        rating_data = rating_qs.aggregate(avg_rating=Avg("rating"))
+        context["avg_rating"] = rating_data["avg_rating"]
+        context["review_count"] = rating_qs.count()
         return context
+
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        if not request.user.is_authenticated:
+            return redirect("account_login")
+        rating_raw = request.POST.get("rating", "").strip()
+        comment = request.POST.get("comment", "").strip()
+        rating = None
+        if rating_raw.isdigit():
+            rating = int(rating_raw)
+        if not comment or rating is None or rating < 1 or rating > 5:
+            context = self.get_context_data(object=self.object)
+            context["review_error"] = "Please add a rating and a short comment."
+            context["review_comment"] = comment
+            context["review_rating"] = rating_raw
+            return self.render_to_response(context, status=400)
+        Review.objects.create(
+            book=self.object,
+            user=request.user,
+            rating=rating,
+            comment=comment,
+        )
+        return redirect("Book:detail", pk=self.object.pk)
 
 
 class BookReaderView(BookDetailView):

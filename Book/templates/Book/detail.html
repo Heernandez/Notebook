@@ -21,11 +21,15 @@
   </section>
   <div class="detail-actions-row">
     <div class="detail-rating">
-      <span class="detail-rating-top">
-        <span class="rating-star" aria-hidden="true"></span>
-        <span class="rating-value">4.6</span>
-      </span>
-      <span class="detail-rating-bottom">120 reviews</span>
+      {% if avg_rating %}
+        <span class="detail-rating-top">
+          <span class="rating-star" aria-hidden="true"></span>
+          <span class="rating-value">{{ avg_rating|floatformat:1 }}</span>
+        </span>
+      {% else %}
+        <span class="detail-rating-bottom">No ratings yet</span>
+      {% endif %}
+      <span class="detail-rating-bottom">{{ review_count }} review{% if review_count != 1 %}s{% endif %}</span>
     </div>
     <span class="detail-sep" aria-hidden="true">|</span>
     <button class="save-btn" type="button" aria-label="Save book">
@@ -54,6 +58,69 @@
     <h2>About this notebook</h2>
     <p>{{ book.description|default:"No description yet" }}</p>
   </section>
+  <section class="detail-reviews">
+    <h2>Ratings and reviews</h2>
+    {% if reviews %}
+      <ul class="detail-review-list">
+        {% for review in reviews|slice:":3" %}
+          {% with reviewer_name=review.user.get_full_name|default:review.user.username|default:"Anonymous" %}
+            <li class="detail-review-card">
+              <div class="detail-review-header">
+                <span class="detail-review-avatar" aria-hidden="true">
+                  {{ reviewer_name|slice:":1"|upper }}
+                </span>
+                <span class="detail-review-name">{{ reviewer_name }}</span>
+              </div>
+              <div class="detail-review-meta">
+                <span class="detail-review-stars">{{ review.rating }} ★</span>
+                <span class="detail-review-date">{{ review.created_at|date:"d F Y" }}</span>
+              </div>
+            </li>
+          {% endwith %}
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="detail-review-empty">No ratings yet. Be the first to review.</p>
+    {% endif %}
+    {% if user.is_authenticated %}
+      <form class="detail-review-form" method="post" action="{% url 'Book:detail' book.pk %}" data-review-form>
+        {% csrf_token %}
+        <label class="detail-review-label" for="review-comment">Your review</label>
+        <textarea
+          id="review-comment"
+          name="comment"
+          maxlength="200"
+          rows="3"
+          placeholder="Share a short note about this notebook"
+          required
+        >{{ review_comment|default:"" }}</textarea>
+        <div class="detail-review-stars-input" data-rating-input>
+          <input type="hidden" name="rating" value="{{ review_rating|default:"" }}" />
+          <button type="button" class="detail-star-button" data-value="1" aria-label="1 star">
+            <span class="rating-star" aria-hidden="true"></span>
+          </button>
+          <button type="button" class="detail-star-button" data-value="2" aria-label="2 stars">
+            <span class="rating-star" aria-hidden="true"></span>
+          </button>
+          <button type="button" class="detail-star-button" data-value="3" aria-label="3 stars">
+            <span class="rating-star" aria-hidden="true"></span>
+          </button>
+          <button type="button" class="detail-star-button" data-value="4" aria-label="4 stars">
+            <span class="rating-star" aria-hidden="true"></span>
+          </button>
+          <button type="button" class="detail-star-button" data-value="5" aria-label="5 stars">
+            <span class="rating-star" aria-hidden="true"></span>
+          </button>
+        </div>
+        <button class="detail-review-submit" type="submit" disabled>Send review</button>
+        {% if review_error %}
+          <p class="detail-review-error">{{ review_error }}</p>
+        {% endif %}
+      </form>
+    {% else %}
+      <a class="detail-review-submit" href="{% url 'account_login' %}">Comment</a>
+    {% endif %}
+  </section>
   <script>
     (function () {
       var btn = document.querySelector(".save-btn");
@@ -65,6 +132,41 @@
         saved = !saved;
         img.src = saved ? img.dataset.savedSrc : img.dataset.unsavedSrc;
       });
+
+      var form = document.querySelector("[data-review-form]");
+      if (!form) return;
+      var commentInput = form.querySelector("#review-comment");
+      var ratingInput = form.querySelector("input[name='rating']");
+      var starButtons = form.querySelectorAll(".detail-star-button");
+      var submitBtn = form.querySelector(".detail-review-submit");
+
+      function setStars(value) {
+        Array.prototype.forEach.call(starButtons, function (button) {
+          var starValue = parseInt(button.getAttribute("data-value"), 10);
+          button.classList.toggle("is-active", starValue <= value);
+        });
+      }
+
+      function updateSubmit() {
+        var hasComment = commentInput.value.trim().length > 0;
+        var hasRating = ratingInput.value.trim().length > 0;
+        submitBtn.disabled = !(hasComment && hasRating);
+      }
+
+      Array.prototype.forEach.call(starButtons, function (button) {
+        button.addEventListener("click", function () {
+          ratingInput.value = button.getAttribute("data-value");
+          setStars(parseInt(ratingInput.value, 10));
+          updateSubmit();
+        });
+      });
+
+      commentInput.addEventListener("input", updateSubmit);
+
+      if (ratingInput.value) {
+        setStars(parseInt(ratingInput.value, 10));
+      }
+      updateSubmit();
     })();
   </script>
 {% endblock %}
