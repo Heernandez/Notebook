@@ -60,6 +60,7 @@
         track.style.transform = "translateX(" + (-index * 100) + "%)";
         updateEditLink();
         resetFlip();
+        stage.dispatchEvent(new CustomEvent("reader:page", { detail: { index: index } }));
       }
 
       function updateEditLink() {
