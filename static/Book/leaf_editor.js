@@ -56,7 +56,7 @@
     var modules = await Promise.all([
       import("https://esm.sh/@tiptap/core@2.6.6"),
       import("https://esm.sh/@tiptap/starter-kit@2.6.6"),
-      import("https://esm.sh/tiptap-extension-resize-image@1.3.2"),
+      import("./image_resize.js"),
       import("https://esm.sh/@tiptap/extension-text-style@2.6.6"),
       import("https://esm.sh/@tiptap/extension-color@2.6.6"),
     ]);

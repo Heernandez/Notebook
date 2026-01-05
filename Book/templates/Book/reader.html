@@ -12,6 +12,12 @@
       <h1 class="reader-title">{{ book.title }}</h1>
       {% if user == book.owner and leaves %}
         <a class="reader-edit" href="{% url 'Book:edit_leaf' leaves.0.pk %}" data-edit-link>Edit</a>
+        <form method="post" action="{% url 'Book:delete_leaf' leaves.0.pk %}" data-delete-leaf-form>
+          {% csrf_token %}
+          <button class="reader-delete" type="submit" aria-label="Delete leaf">
+            Delete
+          </button>
+        </form>
       {% endif %}
     </div>
   </header>
@@ -51,6 +57,7 @@
       var prev = stage.querySelector(".reader-prev");
       var next = stage.querySelector(".reader-next");
       var editLink = document.querySelector("[data-edit-link]");
+      var deleteForm = document.querySelector("[data-delete-leaf-form]");
       var index = 0;
       var startX = 0;
       var currentX = 0;
@@ -70,6 +77,12 @@
         var leafId = page.getAttribute("data-leaf-id");
         if (!leafId) return;
         editLink.href = "/leaves/" + leafId + "/edit/?leaf=" + leafId;
+        updateDeleteForm(leafId);
+      }
+
+      function updateDeleteForm(leafId) {
+        if (!deleteForm) return;
+        deleteForm.action = "/leaves/" + leafId + "/delete/";
       }
 
       function clampIndex() {
@@ -163,6 +176,15 @@
       stage.addEventListener("touchend", function () {
         onEnd();
       });
+
+      if (deleteForm) {
+        deleteForm.addEventListener("submit", function (event) {
+          var confirmed = window.confirm("¿Seguro que quieres eliminar esta hoja?");
+          if (!confirmed) {
+            event.preventDefault();
+          }
+        });
+      }
 
       var params = new URLSearchParams(window.location.search);
       var leafParam = params.get("leaf");

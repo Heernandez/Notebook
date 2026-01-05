@@ -11,9 +11,11 @@ urlpatterns = [
     path("<int:pk>/", views.BookDetailView.as_view(), name="detail"),
     path("<int:pk>/save/", views.toggle_saved_book, name="toggle_saved"),
     path("<int:pk>/edit/", views.BookUpdateView.as_view(), name="edit"),
+    path("<int:pk>/delete/", views.delete_book, name="delete"),
     path("<int:pk>/reader/", views.BookReaderView.as_view(), name="reader"),
     path("<int:pk>/add-leaf/", views.LeafCreateView.as_view(), name="add_leaf"),
     path("leaf-editor/upload/", views.leaf_image_upload, name="leaf_image_upload"),
     path("leaves/<int:pk>/edit/", views.LeafUpdateView.as_view(), name="edit_leaf"),
+    path("leaves/<int:pk>/delete/", views.delete_leaf, name="delete_leaf"),
     path("leaf-images/<int:pk>/delete/", views.LeafImageDeleteView.as_view(), name="delete_leaf_image"),
 ]

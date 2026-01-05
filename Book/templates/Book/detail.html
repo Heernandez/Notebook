@@ -59,12 +59,21 @@
       </button>
     </form>
     {% if user == book.owner %}
+      <span class="detail-sep" aria-hidden="true">|</span>
       <a class="save-btn detail-edit" href="{% url 'Book:edit' book.pk %}" aria-label="Edit">
         <img src="{% static 'Book/edit.svg' %}" alt="" aria-hidden="true" />
       </a>
+      <span class="detail-sep" aria-hidden="true">|</span>
       <a class="save-btn detail-add" href="{% url 'Book:add_leaf' book.pk %}" aria-label="Add leaf">
         <img src="{% static 'Book/add.png' %}" alt="" aria-hidden="true" />
       </a>
+      <span class="detail-sep" aria-hidden="true">|</span>
+      <form method="post" action="{% url 'Book:delete' book.pk %}" data-delete-book-form>
+        {% csrf_token %}
+        <button class="save-btn detail-delete" type="submit" aria-label="Delete book">
+          <img src="{% static 'delete.png' %}" alt="" aria-hidden="true" />
+        </button>
+      </form>
     {% endif %}
   </div>
   <section class="detail-about">
@@ -178,6 +187,16 @@
         setStars(parseInt(ratingInput.value, 10));
       }
       updateSubmit();
+    })();
+    (function () {
+      var deleteForm = document.querySelector("[data-delete-book-form]");
+      if (!deleteForm) return;
+      deleteForm.addEventListener("submit", function (event) {
+        var confirmed = window.confirm("¿Seguro que quieres eliminar este libro?");
+        if (!confirmed) {
+          event.preventDefault();
+        }
+      });
     })();
   </script>
 {% endblock %}

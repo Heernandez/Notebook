@@ -295,6 +295,27 @@ def toggle_saved_book(request, pk):
 
 @login_required
 @require_POST
+def delete_book(request, pk):
+    book = Book.objects.filter(pk=pk, owner=request.user).first()
+    if not book:
+        raise Http404
+    book.delete()
+    return redirect("Book:my_list")
+
+
+@login_required
+@require_POST
+def delete_leaf(request, pk):
+    leaf = Leaf.objects.filter(pk=pk, book__owner=request.user).first()
+    if not leaf:
+        raise Http404
+    book_id = leaf.book_id
+    leaf.delete()
+    return redirect("Book:detail", pk=book_id)
+
+
+@login_required
+@require_POST
 def leaf_image_upload(request):
     file = request.FILES.get("image")
     if not file:

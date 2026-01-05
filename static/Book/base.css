@@ -659,6 +659,26 @@ main {
   white-space: nowrap;
 }
 
+.reader-delete {
+  border: 1px solid var(--line);
+  background: var(--card);
+  color: var(--ink);
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.reader-delete img {
+  width: 16px;
+  height: 16px;
+  display: block;
+}
+
 .reader-shell {
   position: relative;
   overflow: hidden;
