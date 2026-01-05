@@ -4,3 +4,4 @@ Pillow>=10.0
 django-allauth>=0.63
 PyJWT>=2.10.1
 requests>=2.32.5
+cryptography>=4.15.0
